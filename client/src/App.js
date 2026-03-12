@@ -8658,6 +8658,7 @@ function App() {
 
             const datesWithAppointments = new Set(
               displayAppointments.map(apt => formatDateForComparison(apt.date))
+            );
 
             const tileClassName = ({ date, view }) => {
               if (view === 'month') {
