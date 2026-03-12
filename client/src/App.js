@@ -59,6 +59,7 @@ function App() {
   const isAdmin = ADMIN_TG_IDS.includes(tgUser?.id);
   const [slotsAdmin, setSlotsAdmin] = useState([]);
   const [myHistory, setMyHistory] = useState([]);
+  const [appointmentsTab, setAppointmentsTab] = useState("upcoming"); // "upcoming" or "archived"
   const [clientList, setClientList] = useState([]);
   const [clientHistory, setClientHistory] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
@@ -96,6 +97,13 @@ function App() {
   const [rescheduleOldDate, setRescheduleOldDate] = useState(null);
   const [rescheduleOldTime, setRescheduleOldTime] = useState(null);
   const [rescheduleSelectedSlotId, setRescheduleSelectedSlotId] = useState(null);
+
+  // NOTIFICATION MODAL
+  const [notificationModal, setNotificationModal] = useState({
+    show: false,
+    action: null, // 'cancel', 'confirm', 'pending'
+    appointmentId: null
+  });
 
   // EDIT PRICE MODAL
   const [editPriceModalOpen, setEditPriceModalOpen] = useState(false);
@@ -2058,6 +2066,71 @@ function App() {
           </button>
         </div>
 
+        {/* Tabs for Upcoming and Archived Appointments */}
+        <div style={{
+          display: 'flex',
+          gap: '10px',
+          marginBottom: '20px',
+          padding: '0 10px'
+        }}>
+          <button
+            onClick={() => setAppointmentsTab("upcoming")}
+            style={{
+              flex: 1,
+              padding: '12px 20px',
+              borderRadius: '12px',
+              border: 'none',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              background: appointmentsTab === "upcoming" ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'rgba(0,0,0,0.1)',
+              color: appointmentsTab === "upcoming" ? 'white' : '#666',
+              transition: 'all 0.3s ease',
+              boxShadow: appointmentsTab === "upcoming" ? '0 4px 15px rgba(102, 126, 234, 0.3)' : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (appointmentsTab !== "upcoming") {
+                e.target.style.background = 'rgba(0,0,0,0.15)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (appointmentsTab !== "upcoming") {
+                e.target.style.background = 'rgba(0,0,0,0.1)';
+              }
+            }}
+          >
+            📅 Актуальні записи
+          </button>
+          <button
+            onClick={() => setAppointmentsTab("archived")}
+            style={{
+              flex: 1,
+              padding: '12px 20px',
+              borderRadius: '12px',
+              border: 'none',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              background: appointmentsTab === "archived" ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'rgba(0,0,0,0.1)',
+              color: appointmentsTab === "archived" ? 'white' : '#666',
+              transition: 'all 0.3s ease',
+              boxShadow: appointmentsTab === "archived" ? '0 4px 15px rgba(102, 126, 234, 0.3)' : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (appointmentsTab !== "archived") {
+                e.target.style.background = 'rgba(0,0,0,0.15)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (appointmentsTab !== "archived") {
+                e.target.style.background = 'rgba(0,0,0,0.1)';
+              }
+            }}
+          >
+            📦 Архів записів
+          </button>
+        </div>
+
         {/* Appointments List */}
         {myHistory.length === 0 ? (
           <div style={{
@@ -2091,10 +2164,46 @@ function App() {
             gap: '20px',
             padding: '0 10px'
           }}>
-            {myHistory.map(h => {
-              const label = getSlotLabel(h.date);
+            {(() => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
               
-              // Status-based color coding
+              const upcomingAppointments = myHistory.filter(h => {
+                const appointmentDate = new Date(h.date);
+                appointmentDate.setHours(0, 0, 0, 0);
+                return appointmentDate >= today;
+              });
+              
+              const archivedAppointments = myHistory.filter(h => {
+                const appointmentDate = new Date(h.date);
+                appointmentDate.setHours(0, 0, 0, 0);
+                return appointmentDate < today;
+              });
+              
+              const displayAppointments = appointmentsTab === "upcoming" ? upcomingAppointments : archivedAppointments;
+              
+              if (displayAppointments.length === 0) {
+                const emptyMsg = appointmentsTab === "upcoming" ? "У вас немає майбутніх записів" : "Архів записів порожній";
+                return (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '40px 20px',
+                    background: '#f0f0f0',
+                    borderRadius: '12px',
+                    color: '#666'
+                  }}>
+                    {emptyMsg}
+                  </div>
+                );
+              }
+              
+              return displayAppointments;
+            })().map(h => {
+              const label = getSlotLabel(h.date);
+              console.log(`Appointment ${h.id} has status: "${h.status}"`); // Debug
+              
+              // Status-based color coding - normalize status
+              const normalizedStatus = h.status?.toLowerCase() || 'pending';
               const getStatusColor = (status) => {
                 switch(status) {
                   case 'approved':
@@ -2107,7 +2216,7 @@ function App() {
                 }
               };
               
-              const statusColor = getStatusColor(h.status);
+              const statusColor = getStatusColor(normalizedStatus);
               
               return (
                 <div
@@ -2138,7 +2247,7 @@ function App() {
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
                   }}>
-                    {h.status === 'approved' ? '✅ Затвер.' : h.status === 'canceled' ? '❌ Скасов.' : '⏳ Очікує'}
+                    {normalizedStatus === 'approved' ? '✅ Затвер.' : normalizedStatus === 'canceled' ? '❌ Скасов.' : '⏳ Очікує'}
                   </div>
 
                   {/* Date and time */}
@@ -2361,27 +2470,11 @@ function App() {
                     {/* Cancel Button */}
                     <button
                       onClick={() => {
-                        const shouldCancel = window.confirm('Ви впевнені, що хочете скасувати цей запис?');
-                        if (shouldCancel) {
-                          fetch(`${API}/api/appointment/cancel`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'x-init-data': WebApp.initData },
-                            body: JSON.stringify({ tg_id: tgUser.id })
-                          })
-                            .then(r => r.json())
-                            .then(data => {
-                              if (data.ok) {
-                                alert('✅ Запис скасовано!');
-                                setMyHistory(myHistory.filter(a => a.id !== h.id));
-                              } else {
-                                alert('❌ Помилка: ' + data.error);
-                              }
-                            })
-                            .catch(err => {
-                              console.error('Cancel error:', err);
-                              alert('❌ Помилка скасування');
-                            });
-                        }
+                        setNotificationModal({
+                          show: true,
+                          action: 'cancel',
+                          appointmentId: h.id
+                        });
                       }}
                       style={{
                         background: 'rgba(231, 76, 60, 0.1)',
@@ -2456,6 +2549,117 @@ function App() {
         )}
 
         {modal}
+
+        {/* Notification Modal */}
+        {notificationModal.show && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1005,
+          }} onClick={() => setNotificationModal({ ...notificationModal, show: false })}>
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '30px',
+              maxWidth: '400px',
+              width: '90%',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+              textAlign: 'center'
+            }} onClick={(e) => e.stopPropagation()}>
+              <h2 style={{ margin: '0 0 15px 0', color: '#333' }}>📨 Відправити повідомлення?</h2>
+              <p style={{ color: '#666', marginBottom: '25px', lineHeight: '1.5' }}>
+                Відправити клієнту повідомлення про цю зміну?
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button
+                  onClick={() => {
+                    if (notificationModal.action === 'cancel') {
+                      fetch(`${API}/api/appointment/cancel`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-init-data': WebApp.initData },
+                        body: JSON.stringify({ tg_id: tgUser.id, send_notification: true })
+                      })
+                        .then(r => r.json())
+                        .then(data => {
+                          if (data.ok) {
+                            alert('✅ Запис скасовано!');
+                            setMyHistory(myHistory.filter(a => a.id !== notificationModal.appointmentId));
+                          } else {
+                            alert('❌ Помилка: ' + data.error);
+                          }
+                        })
+                        .catch(err => {
+                          console.error('Cancel error:', err);
+                          alert('❌ Помилка');
+                        });
+                    }
+                    setNotificationModal({ ...notificationModal, show: false });
+                  }}
+                  style={{
+                    background: '#28a745',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    color: 'white',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = '#218838'}
+                  onMouseLeave={(e) => e.target.style.background = '#28a745'}
+                >
+                  ✅ Так
+                </button>
+                <button
+                  onClick={() => {
+                    if (notificationModal.action === 'cancel') {
+                      fetch(`${API}/api/appointment/cancel`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-init-data': WebApp.initData },
+                        body: JSON.stringify({ tg_id: tgUser.id, send_notification: false })
+                      })
+                        .then(r => r.json())
+                        .then(data => {
+                          if (data.ok) {
+                            alert('✅ Запис скасовано!');
+                            setMyHistory(myHistory.filter(a => a.id !== notificationModal.appointmentId));
+                          } else {
+                            alert('❌ Помилка: ' + data.error);
+                          }
+                        })
+                        .catch(err => {
+                          console.error('Cancel error:', err);
+                          alert('❌ Помилка');
+                        });
+                    }
+                    setNotificationModal({ ...notificationModal, show: false });
+                  }}
+                  style={{
+                    background: '#dc3545',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    color: 'white',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = '#c82333'}
+                  onMouseLeave={(e) => e.target.style.background = '#dc3545'}
+                >
+                  ❌ Ні
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
