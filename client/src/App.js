@@ -3736,8 +3736,7 @@ function App() {
       const appointmentDate = new Date(`${a.date}T${a.time}`);
       return appointmentDate >= now;
     });
-    
-    const displayAppointments = adminActiveTab === 'archive' ? archiveAppointments : currentAppointments;
+
     return (
       <div className="app-container">
         {/* Modern Header */}
