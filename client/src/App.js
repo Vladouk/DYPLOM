@@ -3405,7 +3405,7 @@ function App() {
           {/* Contact Master Card */}
           <div
             className="menu-card"
-            onClick={() => WebApp.openTelegramLink("https://t.me/vlad0uk")}
+            onClick={() => WebApp.openTelegramLink("https://t.me/Polyaaoa")}
             style={{
               background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
               borderRadius: '16px',
