@@ -9509,6 +9509,168 @@ function App() {
         {modal}
         {appointmentDetailModal}
         {priceEditModal}
+
+        {/* Notification Dialog for Admin Actions */}
+        {notificationDialog.isOpen && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1002,
+          }} onClick={() => setNotificationDialog({ ...notificationDialog, isOpen: false })}>
+            <div
+              style={{
+                background: 'white',
+                borderRadius: '16px',
+                padding: '30px',
+                maxWidth: '450px',
+                width: '90%',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                textAlign: 'center'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                fontSize: '2rem',
+                marginBottom: '15px'
+              }}>
+                📱
+              </div>
+              
+              <h3 style={{
+                margin: '0 0 15px 0',
+                fontSize: '1.3rem',
+                color: '#2c3e50',
+                fontWeight: '600'
+              }}>
+                Відправити клієнту повідомлення?
+              </h3>
+
+              <p style={{
+                margin: '0 0 25px 0',
+                color: '#666',
+                fontSize: '0.95rem',
+                lineHeight: '1.5'
+              }}>
+                {notificationDialog.action === 'status' && notificationDialog.statusValue === 'approved' 
+                  ? 'Клієнт отримає повідомлення про підтвердження запису'
+                  : notificationDialog.action === 'status' && notificationDialog.statusValue === 'canceled'
+                    ? 'Клієнт отримає повідомлення про скасування запису'
+                    : notificationDialog.action === 'delete'
+                      ? 'Клієнт отримає повідомлення про видалення запису'
+                      : 'Клієнт отримає повідомлення про зміну в записі'}
+              </p>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '12px'
+              }}>
+                <button
+                  onClick={() => {
+                    setNotificationDialog({ ...notificationDialog, isOpen: false });
+                  }}
+                  style={{
+                    background: 'rgba(149, 165, 166, 0.1)',
+                    border: '2px solid #95a5a6',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    color: '#95a5a6',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#95a5a6';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(149, 165, 166, 0.1)';
+                    e.target.style.color = '#95a5a6';
+                  }}
+                >
+                  ✕ Скасувати
+                </button>
+
+                <button
+                  onClick={() => {
+                    const { appointmentId, action, statusValue } = notificationDialog;
+                    setNotificationDialog({ ...notificationDialog, isOpen: false });
+
+                    if (action === 'status') {
+                      executeStatusChange(appointmentId, statusValue, false);
+                    } else if (action === 'delete') {
+                      executeDelete(appointmentId, false);
+                    }
+                  }}
+                  style={{
+                    background: 'rgba(52, 152, 219, 0.1)',
+                    border: '2px solid #3498db',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    color: '#3498db',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#3498db';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'rgba(52, 152, 219, 0.1)';
+                    e.target.style.color = '#3498db';
+                  }}
+                >
+                  ❌ Ні, без SMS
+                </button>
+
+                <button
+                  onClick={() => {
+                    const { appointmentId, action, statusValue } = notificationDialog;
+                    setNotificationDialog({ ...notificationDialog, isOpen: false });
+
+                    if (action === 'status') {
+                      executeStatusChange(appointmentId, statusValue, true);
+                    } else if (action === 'delete') {
+                      executeDelete(appointmentId, true);
+                    }
+                  }}
+                  style={{
+                    background: '#27ae60',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    color: 'white',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 15px rgba(39, 174, 96, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#229954';
+                    e.target.style.boxShadow = '0 6px 20px rgba(39, 174, 96, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = '#27ae60';
+                    e.target.style.boxShadow = '0 4px 15px rgba(39, 174, 96, 0.3)';
+                  }}
+                >
+                  ✅ Так, SMS
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
