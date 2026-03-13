@@ -8298,6 +8298,19 @@ function App() {
       return dateA - dateB;
     });
 
+    // Separate appointments into current and archive
+    const now = new Date();
+    const archiveAppointments = sortedAppointments.filter(a => {
+      const appointmentDate = new Date(`${a.date}T${a.time}`);
+      return appointmentDate < now;
+    });
+    const currentAppointments = sortedAppointments.filter(a => {
+      const appointmentDate = new Date(`${a.date}T${a.time}`);
+      return appointmentDate >= now;
+    });
+    
+    const displayAppointments = adminActiveTab === 'archive' ? archiveAppointments : currentAppointments;
+
     return (
       <div className="app-container">
         {/* Modern Header */}
