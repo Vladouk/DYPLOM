@@ -90,6 +90,9 @@ function App() {
   const [isLoadingAdminPrices, setIsLoadingAdminPrices] = useState(false);
   const [isSavingAdminPrices, setIsSavingAdminPrices] = useState(false);
   const [adminCalendarView, setAdminCalendarView] = useState(false);
+  const [broadcastModalOpen, setBroadcastModalOpen] = useState(false);
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastStatus, setBroadcastStatus] = useState('');
 
   // RESCHEDULE APPOINTMENT
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
@@ -1103,7 +1106,7 @@ function App() {
   const changeStatus = (id, newStatus, appointmentData) => {
     // Find the appointment to get its data
     const apt = appointments.find(a => a.id === id) || appointmentData;
-    
+
     setNotificationDialog({
       isOpen: true,
       appointmentId: id,
@@ -1121,8 +1124,8 @@ function App() {
         "Content-Type": "application/json",
         "x-init-data": WebApp.initData
       },
-      body: JSON.stringify({ 
-        id, 
+      body: JSON.stringify({
+        id,
         status: newStatus,
         notify_client: sendNotification
       })
@@ -1137,7 +1140,7 @@ function App() {
 
   const deleteAppointment = (id, appointmentData) => {
     const apt = appointments.find(a => a.id === id) || appointmentData;
-    
+
     setNotificationDialog({
       isOpen: true,
       appointmentId: id,
@@ -1159,7 +1162,7 @@ function App() {
         "Content-Type": "application/json",
         "x-init-data": WebApp.initData
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         id,
         notify_client: sendNotification
       })
@@ -1200,6 +1203,41 @@ function App() {
       .catch(err => {
         console.error("Price update error:", err);
         alert(`❌ Помилка оновлення ціни: ${err.message}`);
+      });
+  };
+
+  const sendBroadcastMessage = () => {
+    if (!broadcastMessage.trim()) {
+      alert('Введіть текст повідомлення');
+      return;
+    }
+
+    setBroadcastStatus('Відправка...');
+
+    fetch(`${API}/api/admin/broadcast`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-init-data': WebApp.initData
+      },
+      body: JSON.stringify({ message: broadcastMessage })
+    })
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(body.error || 'Помилка відправки');
+        }
+        return body;
+      })
+      .then((data) => {
+        setBroadcastStatus(`✅ Повідомлення надіслано ${data.sent} користувачам`);
+        setBroadcastMessage('');
+        setTimeout(() => setBroadcastStatus(''), 5000);
+        setBroadcastModalOpen(false);
+      })
+      .catch((err) => {
+        console.error('Broadcast error:', err);
+        setBroadcastStatus(`❌ ${err.message || 'Помилка'}`);
       });
   };
 
@@ -1268,8 +1306,8 @@ function App() {
               key={c.tg_id}
               className="menu-card"
               style={{
-                background: c.is_blacklisted 
-                  ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)' 
+                background: c.is_blacklisted
+                  ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)'
                   : 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
                 borderRadius: '16px',
                 padding: '20px',
@@ -1426,7 +1464,7 @@ function App() {
                 >
                   📋 Історія
                 </button>
-                
+
                 {!c.is_blacklisted ? (
                   <button
                     onClick={(e) => {
@@ -2139,10 +2177,10 @@ function App() {
           }}>
             {myHistory.map(h => {
               const label = getSlotLabel(h.date);
-              
+
               // Status-based color coding
               const getStatusColor = (status) => {
-                switch(status) {
+                switch (status) {
                   case 'approved':
                     return { bg: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)', shadow: '0 8px 25px rgba(76, 175, 80, 0.3)', text: '#1e5631', statusBg: '#28a745', statusColor: '#fff' };
                   case 'canceled':
@@ -2152,9 +2190,9 @@ function App() {
                     return { bg: 'linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%)', shadow: '0 8px 25px rgba(255, 193, 7, 0.3)', text: '#856404', statusBg: '#ffc107', statusColor: '#333' };
                 }
               };
-              
+
               const statusColor = getStatusColor(h.status);
-              
+
               return (
                 <div
                   key={h.id}
@@ -4186,7 +4224,7 @@ function App() {
               }}>
                 📱
               </div>
-              
+
               <h3 style={{
                 margin: '0 0 15px 0',
                 fontSize: '1.3rem',
@@ -4202,7 +4240,7 @@ function App() {
                 fontSize: '0.95rem',
                 lineHeight: '1.5'
               }}>
-                {notificationDialog.action === 'status' && notificationDialog.statusValue === 'approved' 
+                {notificationDialog.action === 'status' && notificationDialog.statusValue === 'approved'
                   ? 'Клієнт отримає повідомлення про підтвердження запису'
                   : notificationDialog.action === 'status' && notificationDialog.statusValue === 'canceled'
                     ? 'Клієнт отримає повідомлення про скасування запису'
@@ -8296,8 +8334,97 @@ function App() {
       const appointmentDate = new Date(`${a.date}T${a.time}`);
       return appointmentDate >= now;
     });
-    
+
     const displayAppointments = adminActiveTab === 'archive' ? archiveAppointments : currentAppointments;
+
+    const broadcastModal = broadcastModalOpen ? (
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.65)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}
+        onClick={() => setBroadcastModalOpen(false)}
+      >
+        <div
+          style={{
+            background: 'white',
+            borderRadius: '18px',
+            width: '100%',
+            maxWidth: '560px',
+            padding: '25px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+            position: 'relative'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 style={{ margin: 0, marginBottom: '18px', color: '#2c3e50' }}>
+            📣 Повідомлення всім клієнтам
+          </h2>
+          <textarea
+            value={broadcastMessage}
+            onChange={(e) => setBroadcastMessage(e.target.value)}
+            placeholder="Напишіть текст повідомлення для всіх клієнтів"
+            style={{
+              width: '100%',
+              minHeight: '180px',
+              borderRadius: '14px',
+              border: '1px solid #dcdcdc',
+              padding: '16px',
+              fontSize: '1rem',
+              resize: 'vertical',
+              marginBottom: '16px'
+            }}
+          />
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              onClick={sendBroadcastMessage}
+              style={{
+                background: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '12px 22px',
+                color: 'white',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Відправити
+            </button>
+            <button
+              onClick={() => {
+                setBroadcastModalOpen(false);
+                setBroadcastStatus('');
+              }}
+              style={{
+                background: '#f5f5f5',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '12px 22px',
+                color: '#333',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Скасувати
+            </button>
+          </div>
+          {broadcastStatus && (
+            <div style={{ marginTop: '16px', color: broadcastStatus.startsWith('✅') ? '#27ae60' : '#c0392b' }}>
+              {broadcastStatus}
+            </div>
+          )}
+        </div>
+      </div>
+    ) : null;
 
     return (
       <div className="app-container">
@@ -8386,8 +8513,8 @@ function App() {
           <button
             onClick={() => setAdminActiveTab('all')}
             style={{
-              background: adminActiveTab === 'all' 
-                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+              background: adminActiveTab === 'all'
+                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                 : 'rgba(255,255,255,0.6)',
               border: 'none',
               borderRadius: '12px',
@@ -8397,8 +8524,8 @@ function App() {
               color: adminActiveTab === 'all' ? 'white' : '#2c3e50',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              boxShadow: adminActiveTab === 'all' 
-                ? '0 6px 20px rgba(102, 126, 234, 0.4)' 
+              boxShadow: adminActiveTab === 'all'
+                ? '0 6px 20px rgba(102, 126, 234, 0.4)'
                 : '0 2px 8px rgba(0,0,0,0.1)'
             }}
             onMouseEnter={(e) => {
@@ -8420,8 +8547,8 @@ function App() {
           <button
             onClick={() => setAdminActiveTab('archive')}
             style={{
-              background: adminActiveTab === 'archive' 
-                ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' 
+              background: adminActiveTab === 'archive'
+                ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
                 : 'rgba(255,255,255,0.6)',
               border: 'none',
               borderRadius: '12px',
@@ -8431,8 +8558,8 @@ function App() {
               color: adminActiveTab === 'archive' ? 'white' : '#2c3e50',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              boxShadow: adminActiveTab === 'archive' 
-                ? '0 6px 20px rgba(245, 87, 108, 0.4)' 
+              boxShadow: adminActiveTab === 'archive'
+                ? '0 6px 20px rgba(245, 87, 108, 0.4)'
                 : '0 2px 8px rgba(0,0,0,0.1)'
             }}
             onMouseEnter={(e) => {
@@ -8628,9 +8755,36 @@ function App() {
               >
                 📅 Календар
               </button>
+              <button
+                onClick={() => setBroadcastModalOpen(true)}
+                style={{
+                  background: 'rgba(255,255,255,0.9)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '15px 20px',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  color: '#8e44ad',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(142, 68, 173, 0.25)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                }}
+              >
+                📣 Розсилка клієнтам
+              </button>
             </div>
           </div>
         </div>
+
+        {broadcastModal}
 
         {/* Calendar View or List View */}
         {adminCalendarView ? (
@@ -8658,7 +8812,7 @@ function App() {
             });
 
             const datesWithAppointments = new Set(
-              displayAppointments.map(apt => formatDateForComparison(apt.date))
+              sortedAppointments.map(apt => formatDateForComparison(apt.date))
             );
 
             const tileClassName = ({ date, view }) => {
@@ -8795,6 +8949,32 @@ function App() {
                               {apt.status === 'confirmed' ? '✅ Підтверджено' : apt.status === 'approved' ? '✔️ Затверджено' : '⏳ Очікує'}
                             </div>
                           </div>
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+                            <button
+                              onClick={() => setSelectedDetailedAppointment(apt)}
+                              style={{
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '10px 16px',
+                                fontSize: '0.85rem',
+                                fontWeight: '600',
+                                color: 'white',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-1px)';
+                                e.target.style.boxShadow = '0 6px 15px rgba(102, 126, 234, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = 'none';
+                              }}
+                            >
+                              🔎 Деталі
+                            </button>
+                          </div>
                           {/* Action buttons */}
                           <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
                             {apt.status !== 'approved' && (
@@ -8873,18 +9053,18 @@ function App() {
               {displayAppointments.map(a => {
                 // Status-based color coding for admin view
                 const getStatusColorAdmin = (status) => {
-                  switch(status) {
+                  switch (status) {
                     case 'approved':
-                      return { 
-                        bg: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)', 
+                      return {
+                        bg: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)',
                         shadow: '0 8px 25px rgba(76, 175, 80, 0.4)',
                         text: '#1e5631',
                         badge: '#28a745',
                         badgeText: '#fff'
                       };
                     case 'canceled':
-                      return { 
-                        bg: 'linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%)', 
+                      return {
+                        bg: 'linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%)',
                         shadow: '0 8px 25px rgba(220, 53, 69, 0.4)',
                         text: '#721c24',
                         badge: '#dc3545',
@@ -8892,8 +9072,8 @@ function App() {
                       };
                     case 'pending':
                     default:
-                      return { 
-                        bg: 'linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%)', 
+                      return {
+                        bg: 'linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%)',
                         shadow: '0 8px 25px rgba(255, 193, 7, 0.4)',
                         text: '#856404',
                         badge: '#ffc107',
@@ -8901,142 +9081,98 @@ function App() {
                       };
                   }
                 };
-                
-                const statusColor = getStatusColorAdmin(a.status);
-                
-                return (
-                <div
-                  className="menu-card"
-                  key={a.id}
-                  style={{
-                    background: statusColor.bg,
-                    borderRadius: '16px',
-                    padding: '25px',
-                    boxShadow: statusColor.shadow,
-                    border: a.viewed_by_admin === false ? '3px solid #FF6B00' : 'none',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'translateY(-3px)';
-                    e.target.style.boxShadow = statusColor.shadow.replace('0.4)', '0.6)');
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = statusColor.shadow;
-                  }}
-                >
-                  {/* Date Badge */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '15px',
-                    left: '15px',
-                    background: 'rgba(255,255,255,0.2)',
-                    color: statusColor.text,
-                    padding: '5px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    textTransform: 'uppercase'
-                  }}>
-                    {getSlotLabel(a.date) === "today" ? "📅 Сьогодні" : getSlotLabel(a.date) === "tomorrow" ? "📅 Завтра" : "📅 Майбутнє"}
-                  </div>
 
-                  {/* NEW Badge for unviewed appointments */}
-                  {a.viewed_by_admin === false && (
+                const statusColor = getStatusColorAdmin(a.status);
+
+                return (
+                  <div
+                    className="menu-card"
+                    key={a.id}
+                    style={{
+                      background: statusColor.bg,
+                      borderRadius: '16px',
+                      padding: '25px',
+                      boxShadow: statusColor.shadow,
+                      border: a.viewed_by_admin === false ? '3px solid #FF6B00' : 'none',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = 'translateY(-3px)';
+                      e.target.style.boxShadow = statusColor.shadow.replace('0.4)', '0.6)');
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = statusColor.shadow;
+                    }}
+                  >
+                    {/* Date Badge */}
                     <div style={{
                       position: 'absolute',
-                      top: '50px',
+                      top: '15px',
                       left: '15px',
-                      background: '#FF6B00',
-                      color: 'white',
+                      background: 'rgba(255,255,255,0.2)',
+                      color: statusColor.text,
                       padding: '5px 12px',
                       borderRadius: '20px',
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      textTransform: 'uppercase',
-                      boxShadow: '0 2px 8px rgba(255, 107, 0, 0.5)',
-                      animation: 'pulse 2s infinite'
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      textTransform: 'uppercase'
                     }}>
-                      🆕 НОВИЙ
-                    </div>
-                  )}
-
-                  {/* Status Badge */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '15px',
-                    right: '15px',
-                    background: statusColor.badge,
-                    color: statusColor.badgeText,
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {a.status === "approved" ? "✅ Затвер." : a.status === "canceled" ? "❌ Скасов." : "⏳ Очікує"}
-                  </div>
-
-                  <div style={{ paddingTop: '50px' }}>
-                    {/* Date and Time */}
-                    <div style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 'bold',
-                      color: statusColor.text,
-                      marginBottom: '15px',
-                      textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}>
-                      📅 {a.date} {a.time}
+                      {getSlotLabel(a.date) === "today" ? "📅 Сьогодні" : getSlotLabel(a.date) === "tomorrow" ? "📅 Завтра" : "📅 Майбутнє"}
                     </div>
 
-                    {/* Client Info */}
-                    <div style={{
-                      background: 'rgba(255,255,255,0.9)',
-                      borderRadius: '12px',
-                      padding: '15px',
-                      marginBottom: '15px'
-                    }}>
+                    {/* NEW Badge for unviewed appointments */}
+                    {a.viewed_by_admin === false && (
                       <div style={{
-                        fontSize: '1.1rem',
+                        position: 'absolute',
+                        top: '50px',
+                        left: '15px',
+                        background: '#FF6B00',
+                        color: 'white',
+                        padding: '5px 12px',
+                        borderRadius: '20px',
+                        fontSize: '0.75rem',
                         fontWeight: 'bold',
-                        color: '#2c3e50',
-                        marginBottom: '8px'
+                        textTransform: 'uppercase',
+                        boxShadow: '0 2px 8px rgba(255, 107, 0, 0.5)',
+                        animation: 'pulse 2s infinite'
                       }}>
-                        {a.tg_id ? (
-                          <a
-                            href={`https://t.me/${a.username || a.tg_id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              color: '#0088cc',
-                              textDecoration: 'none',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px'
-                            }}
-                            onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                            onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                          >
-                            👤 {a.client} →
-                          </a>
-                        ) : (
-                          <>👤 {a.client}</>
-                        )}
+                        🆕 НОВИЙ
                       </div>
-                      <div style={{
-                        fontSize: '0.9rem',
-                        color: '#666',
-                        lineHeight: '1.5'
-                      }}>
-                        💅 {a.design}, {a.length}, {a.type}
-                      </div>
+                    )}
+
+                    {/* Status Badge */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '15px',
+                      right: '15px',
+                      background: statusColor.badge,
+                      color: statusColor.badgeText,
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      fontSize: '0.75rem',
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px'
+                    }}>
+                      {a.status === "approved" ? "✅ Затвер." : a.status === "canceled" ? "❌ Скасов." : "⏳ Очікує"}
                     </div>
 
-                    {/* Comment */}
-                    {a.comment && (
+                    <div style={{ paddingTop: '50px' }}>
+                      {/* Date and Time */}
+                      <div style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        color: statusColor.text,
+                        marginBottom: '15px',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}>
+                        📅 {a.date} {a.time}
+                      </div>
+
+                      {/* Client Info */}
                       <div style={{
                         background: 'rgba(255,255,255,0.9)',
                         borderRadius: '12px',
@@ -9044,425 +9180,469 @@ function App() {
                         marginBottom: '15px'
                       }}>
                         <div style={{
-                          fontSize: '0.9rem',
-                          fontWeight: '600',
+                          fontSize: '1.1rem',
+                          fontWeight: 'bold',
                           color: '#2c3e50',
-                          marginBottom: '5px'
+                          marginBottom: '8px'
                         }}>
-                          💬 Коментар:
+                          {a.tg_id ? (
+                            <a
+                              href={`https://t.me/${a.username || a.tg_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color: '#0088cc',
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px'
+                              }}
+                              onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                              onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                            >
+                              👤 {a.client} →
+                            </a>
+                          ) : (
+                            <>👤 {a.client}</>
+                          )}
                         </div>
                         <div style={{
                           fontSize: '0.9rem',
                           color: '#666',
-                          fontStyle: 'italic'
+                          lineHeight: '1.5'
                         }}>
-                          {a.comment}
+                          💅 {a.design}, {a.length}, {a.type}
                         </div>
                       </div>
-                    )}
 
-                    {/* Reference Image */}
-                    {a.reference_image && (() => {
-                      try {
-                        const images = JSON.parse(a.reference_image);
-                        if (Array.isArray(images) && images.length > 0) {
-                          return (
-                            <div style={{
-                              background: 'rgba(255,255,255,0.9)',
-                              borderRadius: '12px',
-                              padding: '15px',
-                              marginBottom: '15px'
-                            }}>
+                      {/* Comment */}
+                      {a.comment && (
+                        <div style={{
+                          background: 'rgba(255,255,255,0.9)',
+                          borderRadius: '12px',
+                          padding: '15px',
+                          marginBottom: '15px'
+                        }}>
+                          <div style={{
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: '#2c3e50',
+                            marginBottom: '5px'
+                          }}>
+                            💬 Коментар:
+                          </div>
+                          <div style={{
+                            fontSize: '0.9rem',
+                            color: '#666',
+                            fontStyle: 'italic'
+                          }}>
+                            {a.comment}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Reference Image */}
+                      {a.reference_image && (() => {
+                        try {
+                          const images = JSON.parse(a.reference_image);
+                          if (Array.isArray(images) && images.length > 0) {
+                            return (
                               <div style={{
+                                background: 'rgba(255,255,255,0.9)',
+                                borderRadius: '12px',
+                                padding: '15px',
+                                marginBottom: '15px'
+                              }}>
+                                <div style={{
+                                  fontSize: '0.9rem',
+                                  fontWeight: '600',
+                                  color: '#2c3e50',
+                                  marginBottom: '10px',
+                                  textAlign: 'center'
+                                }}>
+                                  🖼️ Фото-приклад:
+                                </div>
+                                <div style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                                  gap: '10px'
+                                }}>
+                                  {images.map((imgPath, idx) => (
+                                    <img
+                                      key={idx}
+                                      src={`${API}${imgPath}`}
+                                      alt={`Reference ${idx + 1}`}
+                                      style={{
+                                        width: '100%',
+                                        maxHeight: '150px',
+                                        objectFit: 'cover',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                      }}
+                                      onClick={() => setModalImage(`${API}${imgPath}`)}
+                                      onMouseEnter={(e) => {
+                                        e.target.style.transform = 'scale(1.05)';
+                                        e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.target.style.transform = 'scale(1)';
+                                        e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                        } catch (e) {
+                          console.error('Error parsing reference_image:', e);
+                        }
+                        return null;
+                      })()}
+
+                      {/* Current Hands Images */}
+                      {a.current_hands_images && (() => {
+                        try {
+                          const images = JSON.parse(a.current_hands_images);
+                          if (Array.isArray(images) && images.length > 0) {
+                            return (
+                              <div style={{
+                                background: 'rgba(255,255,255,0.9)',
+                                borderRadius: '12px',
+                                padding: '15px',
+                                marginBottom: '15px'
+                              }}>
+                                <div style={{
+                                  fontSize: '0.9rem',
+                                  fontWeight: '600',
+                                  color: '#2c3e50',
+                                  marginBottom: '10px',
+                                  textAlign: 'center'
+                                }}>
+                                  ✋ Поточний стан рук:
+                                </div>
+                                <div style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                                  gap: '10px'
+                                }}>
+                                  {images.map((imgPath, idx) => (
+                                    <img
+                                      key={idx}
+                                      src={`${API}${imgPath}`}
+                                      alt={`Current hands ${idx + 1}`}
+                                      style={{
+                                        width: '100%',
+                                        maxHeight: '150px',
+                                        objectFit: 'cover',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                      }}
+                                      onClick={() => setModalImage(`${API}${imgPath}`)}
+                                      onMouseEnter={(e) => {
+                                        e.target.style.transform = 'scale(1.05)';
+                                        e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.target.style.transform = 'scale(1)';
+                                        e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                        } catch (e) {
+                          console.error('Error parsing current_hands_images:', e);
+                        }
+                        return null;
+                      })()}
+
+                      {/* Action Buttons */}
+                      <div style={{
+                        display: 'flex',
+                        gap: '10px',
+                        flexWrap: 'wrap'
+                      }}>
+                        {/* View Details Button - Always visible */}
+                        <button
+                          className="btn-view"
+                          onClick={(e) => { e.stopPropagation(); setSelectedDetailedAppointment(a); }}
+                          style={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            border: 'none',
+                            borderRadius: '10px',
+                            padding: '12px 20px',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: 'white',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+                            transition: 'all 0.3s ease',
+                            flex: 1,
+                            minWidth: '100px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = 'translateY(-2px)';
+                            e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+                          }}
+                        >
+                          👁 Переглянути
+                        </button>
+                        {a.status === "approved" && (
+                          <>
+                            <button
+                              className="btn-cancel"
+                              onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "canceled", a); }}
+                              style={{
+                                background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '12px 20px',
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                color: 'white',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 15px rgba(231, 76, 60, 0.3)',
+                                transition: 'all 0.3s ease',
+                                flex: 1
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 20px rgba(231, 76, 60, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.3)';
+                              }}
+                            >
+                              ❌ Скасувати
+                            </button>
+                            <button
+                              className="btn-secondary"
+                              onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "pending", a); }}
+                              style={{
+                                background: 'linear-gradient(135deg, #f1c40f 0%, #f39c12 100%)',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '12px 20px',
                                 fontSize: '0.9rem',
                                 fontWeight: '600',
                                 color: '#2c3e50',
-                                marginBottom: '10px',
-                                textAlign: 'center'
-                              }}>
-                                🖼️ Фото-приклад:
-                              </div>
-                              <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                                gap: '10px'
-                              }}>
-                                {images.map((imgPath, idx) => (
-                                  <img
-                                    key={idx}
-                                    src={`${API}${imgPath}`}
-                                    alt={`Reference ${idx + 1}`}
-                                    style={{
-                                      width: '100%',
-                                      maxHeight: '150px',
-                                      objectFit: 'cover',
-                                      borderRadius: '8px',
-                                      cursor: 'pointer',
-                                      transition: 'all 0.3s ease',
-                                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                                    }}
-                                    onClick={() => setModalImage(`${API}${imgPath}`)}
-                                    onMouseEnter={(e) => {
-                                      e.target.style.transform = 'scale(1.05)';
-                                      e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.target.style.transform = 'scale(1)';
-                                      e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                                    }}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        }
-                      } catch (e) {
-                        console.error('Error parsing reference_image:', e);
-                      }
-                      return null;
-                    })()}
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 15px rgba(243, 156, 18, 0.3)',
+                                transition: 'all 0.3s ease',
+                                flex: 1
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 20px rgba(243, 156, 18, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 15px rgba(243, 156, 18, 0.3)';
+                              }}
+                            >
+                              ⏳ В очікуванні
+                            </button>
+                          </>
+                        )}
 
-                    {/* Current Hands Images */}
-                    {a.current_hands_images && (() => {
-                      try {
-                        const images = JSON.parse(a.current_hands_images);
-                        if (Array.isArray(images) && images.length > 0) {
-                          return (
-                            <div style={{
-                              background: 'rgba(255,255,255,0.9)',
-                              borderRadius: '12px',
-                              padding: '15px',
-                              marginBottom: '15px'
-                            }}>
-                              <div style={{
+                        {a.status === "canceled" && (
+                          <>
+                            <button
+                              className="btn-approve"
+                              onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "approved", a); }}
+                              style={{
+                                background: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '12px 20px',
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                color: 'white',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 15px rgba(39, 174, 96, 0.3)',
+                                transition: 'all 0.3s ease',
+                                flex: 1
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 20px rgba(39, 174, 96, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 15px rgba(39, 174, 96, 0.3)';
+                              }}
+                            >
+                              ✓ Підтвердити
+                            </button>
+                            <button
+                              className="btn-secondary"
+                              onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "pending", a); }}
+                              style={{
+                                background: 'linear-gradient(135deg, #f1c40f 0%, #f39c12 100%)',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '12px 20px',
                                 fontSize: '0.9rem',
                                 fontWeight: '600',
                                 color: '#2c3e50',
-                                marginBottom: '10px',
-                                textAlign: 'center'
-                              }}>
-                                ✋ Поточний стан рук:
-                              </div>
-                              <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                                gap: '10px'
-                              }}>
-                                {images.map((imgPath, idx) => (
-                                  <img
-                                    key={idx}
-                                    src={`${API}${imgPath}`}
-                                    alt={`Current hands ${idx + 1}`}
-                                    style={{
-                                      width: '100%',
-                                      maxHeight: '150px',
-                                      objectFit: 'cover',
-                                      borderRadius: '8px',
-                                      cursor: 'pointer',
-                                      transition: 'all 0.3s ease',
-                                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                                    }}
-                                    onClick={() => setModalImage(`${API}${imgPath}`)}
-                                    onMouseEnter={(e) => {
-                                      e.target.style.transform = 'scale(1.05)';
-                                      e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.target.style.transform = 'scale(1)';
-                                      e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                                    }}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        }
-                      } catch (e) {
-                        console.error('Error parsing current_hands_images:', e);
-                      }
-                      return null;
-                    })()}
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 15px rgba(243, 156, 18, 0.3)',
+                                transition: 'all 0.3s ease',
+                                flex: 1
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 20px rgba(243, 156, 18, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 15px rgba(243, 156, 18, 0.3)';
+                              }}
+                            >
+                              ⏳ В очікуванні
+                            </button>
+                          </>
+                        )}
 
-                    {/* Action Buttons */}
-                    <div style={{
-                      display: 'flex',
-                      gap: '10px',
-                      flexWrap: 'wrap'
-                    }}>
-                      {/* View Details Button - Always visible */}
-                      <button
-                        className="btn-view"
-                        onClick={(e) => { e.stopPropagation(); setSelectedDetailedAppointment(a); }}
-                        style={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          border: 'none',
-                          borderRadius: '10px',
-                          padding: '12px 20px',
-                          fontSize: '0.9rem',
-                          fontWeight: '600',
-                          color: 'white',
-                          cursor: 'pointer',
-                          boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
-                          transition: 'all 0.3s ease',
-                          flex: 1,
-                          minWidth: '100px'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.transform = 'translateY(-2px)';
-                          e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.transform = 'translateY(0)';
-                          e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
-                        }}
-                      >
-                        👁 Переглянути
-                      </button>
-                      {a.status === "approved" && (
-                        <>
-                          <button
-                            className="btn-cancel"
-                            onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "canceled", a); }}
-                            style={{
-                              background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
-                              border: 'none',
-                              borderRadius: '10px',
-                              padding: '12px 20px',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              color: 'white',
-                              cursor: 'pointer',
-                              boxShadow: '0 4px 15px rgba(231, 76, 60, 0.3)',
-                              transition: 'all 0.3s ease',
-                              flex: 1
-                            }}
-                            onMouseEnter={(e) => {
-                              e.target.style.transform = 'translateY(-2px)';
-                              e.target.style.boxShadow = '0 6px 20px rgba(231, 76, 60, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.3)';
-                            }}
-                          >
-                            ❌ Скасувати
-                          </button>
-                          <button
-                            className="btn-secondary"
-                            onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "pending", a); }}
-                            style={{
-                              background: 'linear-gradient(135deg, #f1c40f 0%, #f39c12 100%)',
-                              border: 'none',
-                              borderRadius: '10px',
-                              padding: '12px 20px',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              color: '#2c3e50',
-                              cursor: 'pointer',
-                              boxShadow: '0 4px 15px rgba(243, 156, 18, 0.3)',
-                              transition: 'all 0.3s ease',
-                              flex: 1
-                            }}
-                            onMouseEnter={(e) => {
-                              e.target.style.transform = 'translateY(-2px)';
-                              e.target.style.boxShadow = '0 6px 20px rgba(243, 156, 18, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 4px 15px rgba(243, 156, 18, 0.3)';
-                            }}
-                          >
-                            ⏳ В очікуванні
-                          </button>
-                        </>
-                      )}
+                        {a.status === "pending" && (
+                          <>
+                            <button
+                              className="btn-approve"
+                              onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "approved", a); }}
+                              style={{
+                                background: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '12px 20px',
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                color: 'white',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 15px rgba(39, 174, 96, 0.3)',
+                                transition: 'all 0.3s ease',
+                                flex: 1
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 20px rgba(39, 174, 96, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 15px rgba(39, 174, 96, 0.3)';
+                              }}
+                            >
+                              ✓ Підтвердити
+                            </button>
 
-                      {a.status === "canceled" && (
-                        <>
-                          <button
-                            className="btn-approve"
-                            onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "approved", a); }}
-                            style={{
-                              background: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)',
-                              border: 'none',
-                              borderRadius: '10px',
-                              padding: '12px 20px',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              color: 'white',
-                              cursor: 'pointer',
-                              boxShadow: '0 4px 15px rgba(39, 174, 96, 0.3)',
-                              transition: 'all 0.3s ease',
-                              flex: 1
-                            }}
-                            onMouseEnter={(e) => {
-                              e.target.style.transform = 'translateY(-2px)';
-                              e.target.style.boxShadow = '0 6px 20px rgba(39, 174, 96, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 4px 15px rgba(39, 174, 96, 0.3)';
-                            }}
-                          >
-                            ✓ Підтвердити
-                          </button>
-                          <button
-                            className="btn-secondary"
-                            onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "pending", a); }}
-                            style={{
-                              background: 'linear-gradient(135deg, #f1c40f 0%, #f39c12 100%)',
-                              border: 'none',
-                              borderRadius: '10px',
-                              padding: '12px 20px',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              color: '#2c3e50',
-                              cursor: 'pointer',
-                              boxShadow: '0 4px 15px rgba(243, 156, 18, 0.3)',
-                              transition: 'all 0.3s ease',
-                              flex: 1
-                            }}
-                            onMouseEnter={(e) => {
-                              e.target.style.transform = 'translateY(-2px)';
-                              e.target.style.boxShadow = '0 6px 20px rgba(243, 156, 18, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 4px 15px rgba(243, 156, 18, 0.3)';
-                            }}
-                          >
-                            ⏳ В очікуванні
-                          </button>
-                        </>
-                      )}
+                            <button
+                              className="btn-cancel"
+                              onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "canceled", a); }}
+                              style={{
+                                background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '12px 20px',
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                color: 'white',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 15px rgba(231, 76, 60, 0.3)',
+                                transition: 'all 0.3s ease',
+                                flex: 1
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 20px rgba(231, 76, 60, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.3)';
+                              }}
+                            >
+                              ✕ Скасувати
+                            </button>
+                          </>
+                        )}
+                      </div>
 
-                      {a.status === "pending" && (
-                        <>
-                          <button
-                            className="btn-approve"
-                            onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "approved", a); }}
-                            style={{
-                              background: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)',
-                              border: 'none',
-                              borderRadius: '10px',
-                              padding: '12px 20px',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              color: 'white',
-                              cursor: 'pointer',
-                              boxShadow: '0 4px 15px rgba(39, 174, 96, 0.3)',
-                              transition: 'all 0.3s ease',
-                              flex: 1
-                            }}
-                            onMouseEnter={(e) => {
-                              e.target.style.transform = 'translateY(-2px)';
-                              e.target.style.boxShadow = '0 6px 20px rgba(39, 174, 96, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 4px 15px rgba(39, 174, 96, 0.3)';
-                            }}
-                          >
-                            ✓ Підтвердити
-                          </button>
+                      {/* Edit Price Button - Always visible */}
+                      <div style={{ marginTop: '10px' }}>
+                        <button
+                          className="btn-edit-price"
+                          onClick={(e) => { e.stopPropagation(); setEditPriceAppointmentId(a.id); setEditPriceValue(a.price.toString()); setEditPriceOldValue(a.price); setEditPriceModalOpen(true); }}
+                          style={{
+                            background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
+                            border: 'none',
+                            borderRadius: '10px',
+                            padding: '12px 20px',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: 'white',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 15px rgba(52, 152, 219, 0.3)',
+                            transition: 'all 0.3s ease',
+                            width: '100%',
+                            marginBottom: '10px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = 'translateY(-2px)';
+                            e.target.style.boxShadow = '0 6px 20px rgba(52, 152, 219, 0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 4px 15px rgba(52, 152, 219, 0.3)';
+                          }}
+                        >
+                          💰 Змінити ціну ({a.price} zł)
+                        </button>
+                      </div>
 
-                          <button
-                            className="btn-cancel"
-                            onClick={(e) => { e.stopPropagation(); changeStatus(a.id, "canceled", a); }}
-                            style={{
-                              background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
-                              border: 'none',
-                              borderRadius: '10px',
-                              padding: '12px 20px',
-                              fontSize: '0.9rem',
-                              fontWeight: '600',
-                              color: 'white',
-                              cursor: 'pointer',
-                              boxShadow: '0 4px 15px rgba(231, 76, 60, 0.3)',
-                              transition: 'all 0.3s ease',
-                              flex: 1
-                            }}
-                            onMouseEnter={(e) => {
-                              e.target.style.transform = 'translateY(-2px)';
-                              e.target.style.boxShadow = '0 6px 20px rgba(231, 76, 60, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.3)';
-                            }}
-                          >
-                            ✕ Скасувати
-                          </button>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Edit Price Button - Always visible */}
-                    <div style={{ marginTop: '10px' }}>
-                      <button
-                        className="btn-edit-price"
-                        onClick={(e) => { e.stopPropagation(); setEditPriceAppointmentId(a.id); setEditPriceValue(a.price.toString()); setEditPriceOldValue(a.price); setEditPriceModalOpen(true); }}
-                        style={{
-                          background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
-                          border: 'none',
-                          borderRadius: '10px',
-                          padding: '12px 20px',
-                          fontSize: '0.9rem',
-                          fontWeight: '600',
-                          color: 'white',
-                          cursor: 'pointer',
-                          boxShadow: '0 4px 15px rgba(52, 152, 219, 0.3)',
-                          transition: 'all 0.3s ease',
-                          width: '100%',
-                          marginBottom: '10px'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.transform = 'translateY(-2px)';
-                          e.target.style.boxShadow = '0 6px 20px rgba(52, 152, 219, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.transform = 'translateY(0)';
-                          e.target.style.boxShadow = '0 4px 15px rgba(52, 152, 219, 0.3)';
-                        }}
-                      >
-                        💰 Змінити ціну ({a.price} zł)
-                      </button>
-                    </div>
-
-                    {/* Delete Button - Always visible for all appointments */}
-                    <div style={{ marginTop: '10px' }}>
-                      <button
-                        className="btn-delete"
-                        onClick={(e) => { e.stopPropagation(); deleteAppointment(a.id, a); }}
-                        style={{
-                          background: 'linear-gradient(135deg, #8e44ad 0%, #6c3483 100%)',
-                          border: 'none',
-                          borderRadius: '10px',
-                          padding: '12px 20px',
-                          fontSize: '0.9rem',
-                          fontWeight: '600',
-                          color: 'white',
-                          cursor: 'pointer',
-                          boxShadow: '0 4px 15px rgba(142, 68, 173, 0.3)',
-                          transition: 'all 0.3s ease',
-                          width: '100%'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.transform = 'translateY(-2px)';
-                          e.target.style.boxShadow = '0 6px 20px rgba(142, 68, 173, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.transform = 'translateY(0)';
-                          e.target.style.boxShadow = '0 4px 15px rgba(142, 68, 173, 0.3)';
-                        }}
-                      >
-                        🗑 Видалити запис повністю
-                      </button>
+                      {/* Delete Button - Always visible for all appointments */}
+                      <div style={{ marginTop: '10px' }}>
+                        <button
+                          className="btn-delete"
+                          onClick={(e) => { e.stopPropagation(); deleteAppointment(a.id, a); }}
+                          style={{
+                            background: 'linear-gradient(135deg, #8e44ad 0%, #6c3483 100%)',
+                            border: 'none',
+                            borderRadius: '10px',
+                            padding: '12px 20px',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: 'white',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 15px rgba(142, 68, 173, 0.3)',
+                            transition: 'all 0.3s ease',
+                            width: '100%'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = 'translateY(-2px)';
+                            e.target.style.boxShadow = '0 6px 20px rgba(142, 68, 173, 0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 4px 15px rgba(142, 68, 173, 0.3)';
+                          }}
+                        >
+                          🗑 Видалити запис повністю
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
 
             {/* Empty State */}
@@ -9542,7 +9722,7 @@ function App() {
               }}>
                 📱
               </div>
-              
+
               <h3 style={{
                 margin: '0 0 15px 0',
                 fontSize: '1.3rem',
@@ -9558,7 +9738,7 @@ function App() {
                 fontSize: '0.95rem',
                 lineHeight: '1.5'
               }}>
-                {notificationDialog.action === 'status' && notificationDialog.statusValue === 'approved' 
+                {notificationDialog.action === 'status' && notificationDialog.statusValue === 'approved'
                   ? 'Клієнт отримає повідомлення про підтвердження запису'
                   : notificationDialog.action === 'status' && notificationDialog.statusValue === 'canceled'
                     ? 'Клієнт отримає повідомлення про скасування запису'
