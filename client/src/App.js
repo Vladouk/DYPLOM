@@ -40,14 +40,14 @@ const getSlotLabel = (dateStr) => {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
 
-  if (isSameDay(slotDate, today)) return "today";
+  if (isSameDay(slotDate, today)) return "dzisiaj";
 
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
 
-  if (isSameDay(slotDate, tomorrow)) return "tomorrow";
+  if (isSameDay(slotDate, tomorrow)) return "jutro";
 
-  return "other";
+  return "inne";
 };
 
 function App() {
@@ -133,8 +133,8 @@ function App() {
     setServiceCategory("");
     setServiceSub("");
     setSizeCategory("");
-    setDesignCategory("Однотонний");
-    setMattingCategory("Глянцеве");
+    setDesignCategory("Jednolity");
+    setMattingCategory("Błyszczący");
     setPrice(0);
     setSelectedSlotId("");
     setEnteredReferralCode("");
@@ -147,7 +147,7 @@ function App() {
 
   const submitBooking = async () => {
     if (!selectedSlotId) {
-      alert("❗ Оберіть дату та час");
+      alert("❗ Wybierz datę i godzinę");
       return;
     }
 
@@ -155,14 +155,14 @@ function App() {
     const effectiveTgId = tgUser?.id || '';
 
     if (!effectiveTgId) {
-      alert('❗ Вкажіть ваш Telegram ID або відкрийте додаток через Telegram Web App');
+      alert('❗ Podaj swój identyfikator Telegram lub otwórz aplikację przez Telegram Web App');
       return;
     }
 
     // Ensure a service is selected (prefer specific sub-service)
     const selectedService = (serviceSub && String(serviceSub).trim()) || (serviceCategory && String(serviceCategory).trim());
     if (!selectedService) {
-      alert("❗ Оберіть послугу");
+      alert("❗ Wybierz usługę");
       return;
     }
 
@@ -203,17 +203,17 @@ function App() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("✅ Запис створено!");
+        alert("✅ Wizyta została utworzona!");
         resetBooking();
         setMode("menu");
       } else if (response.status === 403 && data.blacklisted) {
-        alert(`🚫 Вибачте, ви не можете створювати записи.\n${data.reason ? `Причина: ${data.reason}` : ''}\n\nЯкщо у вас є питання, зверніться до адміністратора.`);
+        alert(`🚫 Przepraszamy, nie możesz tworzyć wizyt.\n${data.reason ? `Powód: ${data.reason}` : ''}\n\nJeśli masz pytania, skontaktuj się z administratorem.`);
       } else {
-        alert("❌ Помилка при відправці");
+        alert("❌ Błąd podczas wysyłania");
       }
     } catch (error) {
       console.error("Error submitting booking:", error);
-      alert("❌ Помилка при відправці");
+      alert("❌ Błąd podczas wysyłania");
     }
   };
 
@@ -283,7 +283,7 @@ function App() {
             fontSize: '14px',
           }}
         >
-          Скачати
+          Pobierz
         </a>
       </div>
     </div>
@@ -324,7 +324,7 @@ function App() {
           marginBottom: '10px',
           textAlign: 'center'
         }}>
-          💰 Змінити ціну
+          💰 Zmień cenę
         </h2>
 
         <div style={{
@@ -339,7 +339,7 @@ function App() {
             color: '#666',
             marginBottom: '5px'
           }}>
-            Стара ціна:
+            Stara cena:
           </div>
           <div style={{
             fontSize: '1.8rem',
@@ -357,7 +357,7 @@ function App() {
           color: '#2c3e50',
           fontSize: '0.95rem'
         }}>
-          Нова ціна (zł):
+          Nowa cena (zł):
         </label>
 
         <input
@@ -366,7 +366,7 @@ function App() {
           step="1"
           value={editPriceValue}
           onChange={(e) => setEditPriceValue(e.target.value)}
-          placeholder="Введіть нову ціну"
+          placeholder="Wpisz nową cenę"
           style={{
             width: '100%',
             padding: '12px',
@@ -392,7 +392,7 @@ function App() {
             color: '#666',
             marginBottom: '5px'
           }}>
-            Нова ціна:
+            Nowa cena:
           </div>
           <div style={{
             fontSize: '1.8rem',
@@ -430,7 +430,7 @@ function App() {
               e.target.style.transform = 'translateY(0)';
             }}
           >
-            Скасувати
+            Anuluj
           </button>
           <button
             onClick={() => updatePrice(editPriceAppointmentId, parseInt(editPriceValue, 10))}
@@ -456,7 +456,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 12px rgba(52, 152, 219, 0.3)';
             }}
           >
-            ✓ Зберегти
+            ✓ Zapisz
           </button>
         </div>
       </div>
@@ -503,7 +503,7 @@ function App() {
           borderBottom: '2px solid #667eea',
           paddingBottom: '15px'
         }}>
-          📋 Деталі запису
+          📋 Szczegóły wizyty
         </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '60vh', overflowY: 'auto', paddingRight: '10px' }}>
@@ -515,10 +515,10 @@ function App() {
             borderLeft: '4px solid #667eea'
           }}>
             <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '5px', fontWeight: '600' }}>
-              👤 КЛІЄНТ
+              👤 KLIENT
             </div>
             <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2c3e50', marginBottom: '8px' }}>
-              {selectedDetailedAppointment.client || selectedDetailedAppointment.client_name || 'Невідомий'}
+              {selectedDetailedAppointment.client || selectedDetailedAppointment.client_name || 'Nieznany'}
             </div>
             {selectedDetailedAppointment.username && (
               <a
@@ -551,7 +551,7 @@ function App() {
           }}>
             <div>
               <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '5px', fontWeight: '600' }}>
-                📅 ДАТА
+                📅 DATA
               </div>
               <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#2c3e50' }}>
                 {selectedDetailedAppointment.date}
@@ -559,7 +559,7 @@ function App() {
             </div>
             <div>
               <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '5px', fontWeight: '600' }}>
-                ⏰ ЧАС
+                ⏰ CZAS
               </div>
               <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#2c3e50' }}>
                 {selectedDetailedAppointment.time}
@@ -575,30 +575,30 @@ function App() {
             borderLeft: '4px solid #f39c12'
           }}>
             <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '10px', fontWeight: '600' }}>
-              💅 ПОСЛУГА
+              💅 USŁUGA
             </div>
             <div style={{ display: 'grid', gap: '8px' }}>
               {selectedDetailedAppointment.service && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                  <span style={{ color: '#666', fontSize: '0.9rem' }}>Вид:</span>
+                  <span style={{ color: '#666', fontSize: '0.9rem' }}>Typ:</span>
                   <span style={{ fontWeight: '600', color: '#2c3e50', fontSize: '1.1rem' }}>{selectedDetailedAppointment.service}</span>
                 </div>
               )}
               {selectedDetailedAppointment.length && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#666', fontSize: '0.9rem' }}>Довжина:</span>
+                  <span style={{ color: '#666', fontSize: '0.9rem' }}>Długość:</span>
                   <span style={{ fontWeight: '600', color: '#2c3e50' }}>{selectedDetailedAppointment.length}</span>
                 </div>
               )}
               {selectedDetailedAppointment.design && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#666', fontSize: '0.9rem' }}>Дизайн:</span>
+                  <span style={{ color: '#666', fontSize: '0.9rem' }}>Projekt:</span>
                   <span style={{ fontWeight: '600', color: '#2c3e50' }}>{selectedDetailedAppointment.design}</span>
                 </div>
               )}
               {selectedDetailedAppointment.type && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#666', fontSize: '0.9rem' }}>Покриття:</span>
+                  <span style={{ color: '#666', fontSize: '0.9rem' }}>Powłoka:</span>
                   <span style={{ fontWeight: '600', color: '#2c3e50' }}>{selectedDetailedAppointment.type}</span>
                 </div>
               )}
@@ -617,7 +617,7 @@ function App() {
           }}>
             <div>
               <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '5px', fontWeight: '600' }}>
-                💰 ЦІНА
+                💰 CENA
               </div>
               <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#2c3e50' }}>
                 {selectedDetailedAppointment.price} zł
@@ -625,7 +625,7 @@ function App() {
             </div>
             <div>
               <div style={{ fontSize: '0.85rem', color: '#666', marginBottom: '5px', fontWeight: '600' }}>
-                📊 СТАТУС
+                📊 STATUS
               </div>
               <div style={{
                 padding: '6px 12px',
@@ -636,7 +636,7 @@ function App() {
                 color: selectedDetailedAppointment.status === 'approved' ? '#155724' : selectedDetailedAppointment.status === 'canceled' ? '#721c24' : '#856404',
                 textAlign: 'center'
               }}>
-                {selectedDetailedAppointment.status === 'approved' ? '✅ Затверджено' : selectedDetailedAppointment.status === 'canceled' ? '❌ Скасовано' : '⏳ Очікує'}
+                {selectedDetailedAppointment.status === 'approved' ? '✅ Zatwierdzone' : selectedDetailedAppointment.status === 'canceled' ? '❌ Anulowane' : '⏳ Oczekiwanie'}
               </div>
             </div>
           </div>
@@ -650,7 +650,7 @@ function App() {
               borderLeft: '4px solid #2196F3'
             }}>
               <div style={{ fontSize: '0.85rem', color: '#1976d2', fontWeight: '600', marginBottom: '8px' }}>
-                💬 КОМЕНТАР
+                💬 KOMENTARZ
               </div>
               <div style={{ color: '#555', lineHeight: '1.5', fontSize: '0.95rem' }}>
                 {selectedDetailedAppointment.comment}
@@ -671,7 +671,7 @@ function App() {
                     borderLeft: '4px solid #e74c3c'
                   }}>
                     <div style={{ fontSize: '0.85rem', color: '#666', fontWeight: '600', marginBottom: '10px' }}>
-                      🖼️ ФОТО-ПРИКЛАД
+                      🖼️ PRZYKŁADOWE ZDJĘCIA
                     </div>
                     <div style={{
                       display: 'grid',
@@ -682,7 +682,7 @@ function App() {
                         <img
                           key={idx}
                           src={`${API}${imgPath}`}
-                          alt={`Reference ${idx + 1}`}
+                          alt={`Odwołanie ${idx + 1}`}
                           style={{
                             width: '100%',
                             maxHeight: '150px',
@@ -726,7 +726,7 @@ function App() {
                     borderLeft: '4px solid #27ae60'
                   }}>
                     <div style={{ fontSize: '0.85rem', color: '#666', fontWeight: '600', marginBottom: '10px' }}>
-                      ✋ ПОТОЧНИЙ СТАН РУК
+                      ✋ OBECNY STAN RĄK
                     </div>
                     <div style={{
                       display: 'grid',
@@ -737,7 +737,7 @@ function App() {
                         <img
                           key={idx}
                           src={`${API}${imgPath}`}
-                          alt={`Current hands ${idx + 1}`}
+                          alt={`Aktualne dłonie ${idx + 1}`}
                           style={{
                             width: '100%',
                             maxHeight: '150px',
@@ -794,7 +794,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
             }}
           >
-            Закрити
+            Zamknij
           </button>
         </div>
       </div>
@@ -805,8 +805,8 @@ function App() {
   const [serviceCategory, setServiceCategory] = useState("");
   const [serviceSub, setServiceSub] = useState("");
   const [sizeCategory, setSizeCategory] = useState(""); // S, M, L, XL, 2XL, 3XL
-  const [designCategory, setDesignCategory] = useState("Однотонний"); // Однотонний, Простий, Середній, Складний
-  const [mattingCategory, setMattingCategory] = useState("Глянцеве"); // Глянцеве, Матове
+  const [designCategory, setDesignCategory] = useState("Jednolity"); // Jednolity, Prosty, Średni, Trudny
+  const [mattingCategory, setMattingCategory] = useState("Błyszczący"); // Błyszczący, Matowy
   const [price, setPrice] = useState(0);
 
   // Memoized price calculation - only recalculates when dependencies change
@@ -821,14 +821,14 @@ function App() {
         );
 
         if (categoryService) {
-          // For services with lengthOptions (Укріплення, Нарощення)
+          // For services with lengthOptions (Wzmocnienie, Przedłużenie)
           if (categoryService.lengthOptions && size) {
             const sizeOption = categoryService.lengthOptions.find(opt => opt.size === size);
             if (sizeOption) {
               basePrice = sizeOption.price || 0;
             }
           }
-          // For fixed price services (Гігієнічний)
+          // For fixed price services (Higieniczny)
           else if (categoryService.fixedPrice) {
             basePrice = categoryService.fixedPrice;
           }
@@ -846,13 +846,13 @@ function App() {
 
       // Fallback to hardcoded prices only if no dynamic data available
       if (basePrice === 0) {
-        if (category === 'Укріплення' && size) {
-          basePrice = { 'Нульова': 100, S: 110, M: 120, L: 130, XL: 140, '2XL': 150, '3XL': 160 }[size] || 0;
-        } else if (category === 'Нарощення' && size) {
-          basePrice = { 'Нульова': 130, S: 130, M: 150, L: 170, XL: 190, '2XL': 210, '3XL': 230 }[size] || 0;
-        } else if (category === 'Гігієнічний') {
+        if (category === 'Wzmocnienie' && size) {
+          basePrice = { 'Zero': 100, S: 110, M: 120, L: 130, XL: 140, '2XL': 150, '3XL': 160 }[size] || 0;
+        } else if (category === 'Przedłużenie' && size) {
+          basePrice = { 'Zero': 130, S: 130, M: 150, L: 170, XL: 190, '2XL': 210, '3XL': 230 }[size] || 0;
+        } else if (category === 'Higieniczny') {
           basePrice = 70;
-        } else if (category === 'Ремонт') {
+        } else if (category === 'Naprawa') {
           basePrice = 0;
         }
       }
@@ -872,11 +872,11 @@ function App() {
       }
       // Fallback to hardcoded if not found
       if (designPrice === 0) {
-        designPrice = { 'Однотонний': 0, 'Простий': 15, 'Середній': 25, 'Складний': 35 }[design] || 0;
+        designPrice = { 'Jednolity': 0, 'Prosty': 15, 'Średni': 25, 'Trudny': 35 }[design] || 0;
       }
 
       // Add matting price
-      const mattingPrice = matting === 'Матове' ? 30 : 0;
+      const mattingPrice = matting === 'Matowy' ? 30 : 0;
 
       return basePrice + designPrice + mattingPrice;
     };
@@ -917,7 +917,7 @@ function App() {
 
       const handleClick = () => {
         if (!selectedSlotId) {
-          alert("❗ Обери дату і час");
+          alert("❗ Wybierz datę i godzinę");
           return;
         }
 
@@ -926,7 +926,7 @@ function App() {
         const effectiveTgId = tgUser?.id || '';
 
         if (!effectiveTgId) {
-          alert('❗ Вкажіть ваш Telegram ID або відкрийте додаток через Telegram Web App');
+          alert('❗ Podaj swój identyfikator Telegram lub otwórz aplikację przez Telegram Web App');
           return;
         }
 
@@ -955,19 +955,19 @@ function App() {
           .then(r => r.json())
           .then(data => {
             if (data.error && data.blacklisted) {
-              alert(`🚫 Вибачте, ви не можете створювати записи.\n${data.reason ? `Причина: ${data.reason}` : ''}\n\nЯкщо у вас є питання, зверніться до адміністратора.`);
+              alert(`🚫 Przepraszamy, nie możesz tworzyć wizyt.\n${data.reason ? `Powód: ${data.reason}` : ''}\n\nJeśli masz pytania, skontaktuj się z administratorem.`);
             } else if (data.error) {
-              alert("❌ Помилка: " + data.error);
+              alert("❌ Błąd: " + data.error);
             } else {
-              alert("✅ Запис створено!");
+              alert("✅ Wizyta została utworzona!");
             }
           })
-          .catch(() => alert("❌ Помилка при відправці"));
+          .catch(() => alert("❌ Błąd podczas wysyłania"));
 
 
       };
 
-      WebApp.MainButton.setText("📅 Записатися");
+      WebApp.MainButton.setText("📅 Wizytaатися");
       WebApp.MainButton.show();
       WebApp.MainButton.onClick(handleClick);
 
@@ -1074,7 +1074,7 @@ function App() {
     })
       .then(r => r.json())
       .then(setAppointments)
-      .catch(() => alert("❌ Помилка завантаження"));
+      .catch(() => alert("❌ Błąd завантаження"));
   };
 
   const loadAppointments = useCallback(() => {
@@ -1098,7 +1098,7 @@ function App() {
           }).catch(err => console.error("Failed to mark as viewed:", err));
         }, 3000); // 3 seconds delay to show new appointments
       })
-      .catch(() => alert("❌ Помилка завантаження"));
+      .catch(() => alert("❌ Błąd завантаження"));
   }, [filter]);
 
 
@@ -1135,7 +1135,7 @@ function App() {
         alert("✅ Статус оновлено!");
         loadAppointments();
       })
-      .catch(() => alert("❌ Помилка оновлення"));
+      .catch(() => alert("❌ Błąd оновлення"));
   };
 
   const deleteAppointment = (id, appointmentData) => {
@@ -1169,10 +1169,10 @@ function App() {
     })
       .then(r => r.json())
       .then(() => {
-        alert("✅ Запис видалено!");
+        alert("✅ Wizyta видалено!");
         loadAppointments();
       })
-      .catch(() => alert("❌ Помилка видалення"));
+      .catch(() => alert("❌ Błąd видалення"));
   };
 
   const updatePrice = (id, newPrice) => {
@@ -1202,7 +1202,7 @@ function App() {
       })
       .catch(err => {
         console.error("Price update error:", err);
-        alert(`❌ Помилка оновлення ціни: ${err.message}`);
+        alert(`❌ Błąd оновлення ціни: ${err.message}`);
       });
   };
 
@@ -1225,19 +1225,19 @@ function App() {
       .then(async (response) => {
         const body = await response.json().catch(() => ({}));
         if (!response.ok) {
-          throw new Error(body.error || 'Помилка відправки');
+          throw new Error(body.error || 'Błąd відправки');
         }
         return body;
       })
       .then((data) => {
-        setBroadcastStatus(`✅ Повідомлення надіслано ${data.sent} користувачам`);
+        setBroadcastStatus(`✅ Wiadomość надіслано ${data.sent} користувачам`);
         setBroadcastMessage('');
         setTimeout(() => setBroadcastStatus(''), 5000);
         setBroadcastModalOpen(false);
       })
       .catch((err) => {
         console.error('Broadcast error:', err);
-        setBroadcastStatus(`❌ ${err.message || 'Помилка'}`);
+        setBroadcastStatus(`❌ ${err.message || 'Błąd'}`);
       });
   };
 
@@ -1259,9 +1259,9 @@ function App() {
           boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
         }}>
           <div style={{ fontSize: '3rem', marginBottom: '10px' }}>👥</div>
-          <h1 style={{ margin: '0 0 5px 0', fontSize: '1.8rem' }}>База клієнтів</h1>
+          <h1 style={{ margin: '0 0 5px 0', fontSize: '1.8rem' }}>Baza klientów</h1>
           <p style={{ margin: '0', opacity: '0.9', fontSize: '0.95rem' }}>
-            Всього клієнтів: {clientList.length}
+            Łącznie klientów: {clientList.length}
           </p>
         </div>
 
@@ -1291,7 +1291,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад в адмінку
+            ← Wstecz do adminki
           </button>
         </div>
 
@@ -1423,11 +1423,11 @@ function App() {
               }}>
                 <span style={{ opacity: 0.7 }}>📅</span>
                 <span>
-                  Останній візит: <strong>{c.last_visit ? new Date(c.last_visit.replace(' ', 'T')).toLocaleDateString('uk-UA', {
+                  Ostatnia wizyta: <strong>{c.last_visit ? new Date(c.last_visit.replace(' ', 'T')).toLocaleDateString('uk-UA', {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'
-                  }) : "немає"}</strong>
+                  }) : "brak"}</strong>
                 </span>
               </div>
 
@@ -1462,7 +1462,7 @@ function App() {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  📋 Історія
+                  📋 Historia
                 </button>
 
                 {!c.is_blacklisted ? (
@@ -1487,9 +1487,9 @@ function App() {
                             })
                               .then(r => r.json())
                               .then(setClientList);
-                            alert('Клієнта додано в чорний список');
+                            alert('Klientа додано в чорний список');
                           })
-                          .catch(err => alert('Помилка: ' + err.message));
+                          .catch(err => alert('Błąd: ' + err.message));
                       }
                     }}
                     style={{
@@ -1505,13 +1505,13 @@ function App() {
                       transition: 'all 0.3s ease'
                     }}
                   >
-                    🚫 Заблокувати
+                    🚫 Zablokuj
                   </button>
                 ) : (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (window.confirm('Видалити клієнта з чорного списку?')) {
+                      if (window.confirm('Usuń клієнта з чорного списку?')) {
                         fetch(`${API}/api/admin/blacklist/remove`, {
                           method: 'POST',
                           headers: {
@@ -1528,9 +1528,9 @@ function App() {
                             })
                               .then(r => r.json())
                               .then(setClientList);
-                            alert('Клієнта видалено з чорного списку');
+                            alert('Klientа видалено з чорного списку');
                           })
-                          .catch(err => alert('Помилка: ' + err.message));
+                          .catch(err => alert('Błąd: ' + err.message));
                       }
                     }}
                     style={{
@@ -1546,7 +1546,7 @@ function App() {
                       transition: 'all 0.3s ease'
                     }}
                   >
-                    ✅ Розблокувати
+                    ✅ Odblokuj
                   </button>
                 )}
               </div>
@@ -1562,8 +1562,8 @@ function App() {
             borderRadius: '20px'
           }}>
             <div style={{ fontSize: '4rem', marginBottom: '20px', opacity: 0.5 }}>👥</div>
-            <h3 style={{ color: '#666', margin: '0 0 10px 0' }}>Поки немає клієнтів</h3>
-            <p style={{ color: '#888', margin: 0 }}>Клієнти з'являться після перших записів</p>
+            <h3 style={{ color: '#666', margin: '0 0 10px 0' }}>Jeszcze brak klientów</h3>
+            <p style={{ color: '#888', margin: 0 }}>Klienci pojawią się po pierwszych wizytach</p>
           </div>
         )}
 
@@ -1670,22 +1670,22 @@ function App() {
             marginBottom: '18px',
           }}>
             {[{
-              label: 'Всього візитів',
+              label: 'Łącznie wizyt',
               value: totalVisits,
               icon: '📅',
               color: '#667eea',
             }, {
-              label: 'Підтверджено',
+              label: 'Potwierdzone',
               value: completedVisits,
               icon: '✅',
               color: '#27ae60',
             }, {
-              label: 'Витрачено всього',
+              label: 'Wydane razem',
               value: `${totalSpent} zł`,
               icon: '💰',
               color: '#f5576c',
             }, {
-              label: 'Середній чек',
+              label: 'Średni чек',
               value: `${avgPrice} zł`,
               icon: '💳',
               color: '#f093fb',
@@ -1727,10 +1727,10 @@ function App() {
                       if (data.ok) {
                         alert(`✅ Додано ${points} балів! Новий баланс: ${data.newPoints}`);
                       } else {
-                        alert('❌ Помилка: ' + (data.error || 'Невідома помилка'));
+                        alert('❌ Błąd: ' + (data.error || 'Невідома помилка'));
                       }
                     })
-                    .catch(() => alert('❌ Помилка підключення'));
+                    .catch(() => alert('❌ Błąd підключення'));
                 }
               }}
               style={{
@@ -1746,7 +1746,7 @@ function App() {
                 transition: 'all 0.2s',
               }}
             >
-              🎁 Додати бонусні бали
+              🎁 Dodaj бонусні бали
             </button>
           </div>
 
@@ -1776,7 +1776,7 @@ function App() {
                 e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.13)';
               }}
             >
-              ⬅ Назад до клієнтів
+              ⬅ Wstecz do klientów
             </button>
           </div>
 
@@ -1797,9 +1797,9 @@ function App() {
             )}
             {clientHistory.map(h => {
               const statusColors = {
-                'approved': { bg: '#d4edda', border: '#28a745', text: '#155724', label: '✅ Підтверджено' },
-                'pending': { bg: '#fff3cd', border: '#ffc107', text: '#856404', label: '⏳ Очікує' },
-                'canceled': { bg: '#f8d7da', border: '#dc3545', text: '#721c24', label: '❌ Скасовано' }
+                'approved': { bg: '#d4edda', border: '#28a745', text: '#155724', label: '✅ Potwierdzone' },
+                'pending': { bg: '#fff3cd', border: '#ffc107', text: '#856404', label: '⏳ Oczekiwanie' },
+                'canceled': { bg: '#f8d7da', border: '#dc3545', text: '#721c24', label: '❌ Anulowane' }
               };
               const statusStyle = statusColors[h.status] || statusColors['pending'];
 
@@ -1880,12 +1880,12 @@ function App() {
                   }}>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span style={{ fontSize: '1.1rem' }}>🎨</span>
-                      <span style={{ color: '#666', fontSize: '0.9rem' }}>Дизайн:</span>
+                      <span style={{ color: '#666', fontSize: '0.9rem' }}>Projekt:</span>
                       <span style={{ fontWeight: '600', color: '#2c3e50' }}>{h.design}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span style={{ fontSize: '1.1rem' }}>📏</span>
-                      <span style={{ color: '#666', fontSize: '0.9rem' }}>Довжина:</span>
+                      <span style={{ color: '#666', fontSize: '0.9rem' }}>Długość:</span>
                       <span style={{ fontWeight: '600', color: '#2c3e50' }}>{h.length}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -1896,7 +1896,7 @@ function App() {
                     {h.service && (
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <span style={{ fontSize: '1.1rem' }}>💼</span>
-                        <span style={{ color: '#666', fontSize: '0.9rem' }}>Послуга:</span>
+                        <span style={{ color: '#666', fontSize: '0.9rem' }}>Usługa:</span>
                         <span style={{ fontWeight: '600', color: '#2c3e50' }}>{h.service}</span>
                       </div>
                     )}
@@ -1911,7 +1911,7 @@ function App() {
                       marginBottom: '10px',
                     }}>
                       <div style={{ fontSize: '0.9rem', color: '#1976d2', fontWeight: '600', marginBottom: '2px' }}>
-                        💬 Коментар:
+                        💬 Komentarz:
                       </div>
                       <div style={{ color: '#555', lineHeight: '1.4' }}>
                         {h.comment}
@@ -2098,7 +2098,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            📖 Мої записи
+            📖 Moje wizyty
           </h2>
           <p style={{
             fontSize: '1.1rem',
@@ -2108,7 +2108,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            Історія ваших візитів
+            Historia twoich wizyt
           </p>
         </div>
 
@@ -2138,7 +2138,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад до меню
+            ← Wstecz do menu
           </button>
         </div>
 
@@ -2162,12 +2162,12 @@ function App() {
               color: '#666',
               fontSize: '1.3rem',
               fontWeight: '600'
-            }}>У вас поки немає записів</h3>
+            }}>У вас поки brak записів</h3>
             <p style={{
               margin: '0',
               color: '#888',
               fontSize: '1rem'
-            }}>Час записатися на перший манікюр! 💅</p>
+            }}>Czas записатися на перший манікюр! 💅</p>
           </div>
         ) : (
           <div style={{
@@ -2222,7 +2222,7 @@ function App() {
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
                   }}>
-                    {h.status === 'approved' ? '✅ Затвер.' : h.status === 'canceled' ? '❌ Скасов.' : '⏳ Очікує'}
+                    {h.status === 'approved' ? '✅ Затвер.' : h.status === 'canceled' ? '❌ Скасов.' : '⏳ Oczekiwanie'}
                   </div>
 
                   {/* Date and time */}
@@ -2266,7 +2266,7 @@ function App() {
                     padding: '15px',
                     marginBottom: '15px'
                   }}>
-                    {/* Послуга та ціна */}
+                    {/* Usługa та ціна */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -2278,7 +2278,7 @@ function App() {
                       <span>{h.service}</span>
                     </div>
 
-                    {/* Оформлення деталей */}
+                    {/* Dekoracja деталей */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -2321,7 +2321,7 @@ function App() {
                       </div>
                     )}
 
-                    {/* Коментар */}
+                    {/* Komentarz */}
                     {h.comment && (
                       <div style={{
                         display: 'flex',
@@ -2455,15 +2455,15 @@ function App() {
                             .then(r => r.json())
                             .then(data => {
                               if (data.ok) {
-                                alert('✅ Запис скасовано!');
+                                alert('✅ Wizyta скасовано!');
                                 setMyHistory(myHistory.filter(a => a.id !== h.id));
                               } else {
-                                alert('❌ Помилка: ' + data.error);
+                                alert('❌ Błąd: ' + data.error);
                               }
                             })
                             .catch(err => {
                               console.error('Cancel error:', err);
-                              alert('❌ Помилка скасування');
+                              alert('❌ Błąd скасування');
                             });
                         }
                       }}
@@ -2487,12 +2487,12 @@ function App() {
                         e.target.style.transform = 'translateY(0)';
                       }}
                     >
-                      ❌ Скасувати
+                      ❌ Anuluj
                     </button>
                     {/* Reschedule Button */}
                     <button
                       onClick={() => {
-                        // Завантажимо доступні слоти
+                        // Pobierzимо доступні слоти
                         fetch(`${API}/api/slots`, {
                           headers: { "x-init-data": WebApp.initData }
                         })
@@ -2507,7 +2507,7 @@ function App() {
                           })
                           .catch(err => {
                             console.error('Error loading slots:', err);
-                            alert('❌ Помилка завантаження часів');
+                            alert('❌ Błąd завантаження часів');
                           });
                       }}
                       style={{
@@ -2530,7 +2530,7 @@ function App() {
                         e.target.style.transform = 'translateY(0)';
                       }}
                     >
-                      📅 Перенести
+                      📅 Przenieś
                     </button>
                   </div>
                 </div>
@@ -2586,7 +2586,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            Професійний догляд за вашими нігтями
+            Profesjonalna pielęgnacja paznokci
           </p>
         </div>
 
@@ -2616,7 +2616,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад до меню
+            ← Wstecz do menu
           </button>
         </div>
 
@@ -2694,7 +2694,7 @@ function App() {
                         color: '#2c3e50'
                       }}>
                         <h4 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', fontWeight: '600' }}>
-                          Довжина нігтів
+                          Długość нігтів
                         </h4>
                         <div style={{ display: 'grid', gap: '10px' }}>
                           {service.lengthOptions.map(item => (
@@ -2729,7 +2729,7 @@ function App() {
                         color: '#2c3e50'
                       }}>
                         <h4 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', fontWeight: '600' }}>
-                          Дизайн (додатково)
+                          Projekt (додатково)
                         </h4>
                         <div style={{ display: 'grid', gap: '10px' }}>
                           {service.designOptions.map(item => (
@@ -2754,7 +2754,7 @@ function App() {
             ))
           ) : (
             <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-              Завантаження ціноутримання...
+              Pobierzення ціноутримання...
             </div>
           )}
         </div>
@@ -2796,7 +2796,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            🎉 Акції
+            🎉 Promocje
           </h2>
           <p style={{
             fontSize: '1.1rem',
@@ -2806,7 +2806,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            Спеціальні пропозиції та знижки
+            Specjalne oferty та знижки
           </p>
         </div>
 
@@ -2836,7 +2836,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад до меню
+            ← Wstecz do menu
           </button>
         </div>
 
@@ -2901,7 +2901,7 @@ function App() {
                     fetch(`${API}/api/referral/code?tg_id=${tgUser?.id}`)
                       .then(r => r.json())
                       .then(data => setReferralCode(data))
-                      .catch(() => alert("Помилка завантаження коду"));
+                      .catch(() => alert("Błąd завантаження коду"));
                   }}
                   style={{
                     background: 'white',
@@ -3180,7 +3180,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            Привіт, {tgUser?.first_name} 💖
+            Cześć, {tgUser?.first_name} 💖
           </p>
         </div>
 
@@ -3226,13 +3226,13 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: 'white'
-            }}>Записатися на манікюр</h3>
+            }}>Zarezerwuj manicure</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
               opacity: '0.9',
               color: 'white'
-            }}>Оберіть час та послугу</p>
+            }}>Wybierz godzinę i usługę</p>
           </div>
 
           {/* My Appointments Card */}
@@ -3284,13 +3284,13 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: '#2c3e50'
-            }}>Мої записи</h3>
+            }}>Moje wizyty</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
               opacity: '0.8',
               color: '#2c3e50'
-            }}>Переглянути мої візити</p>
+            }}>Przejrzyj moje wizyty</p>
           </div>
 
           {/* Admin Panel Card - Only for admins */}
@@ -3335,7 +3335,7 @@ function App() {
                 fontSize: '0.9rem',
                 opacity: '0.9',
                 color: 'white'
-              }}>Панель управління</p>
+              }}>Panel administracyjny</p>
             </div>
           )}
 
@@ -3380,13 +3380,13 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: 'white'
-            }}>Прайс</h3>
+            }}>Cennik</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
               opacity: '0.9',
               color: 'white'
-            }}>Ціни на послуги</p>
+            }}>Ceny usług</p>
           </div>
 
           {/* Promotions Card */}
@@ -3431,13 +3431,13 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: 'white'
-            }}>Акції</h3>
+            }}>Promocje</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
               opacity: '0.9',
               color: 'white'
-            }}>Спеціальні пропозиції</p>
+            }}>Specjalne oferty</p>
           </div>
 
           {/* Contact Master Card */}
@@ -3475,13 +3475,13 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: '#2c3e50'
-            }}>Звʼязатись з майстром</h3>
+            }}>Skontaktuj się z mistrzem</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
               opacity: '0.8',
               color: '#2c3e50'
-            }}>Написати в Telegram</p>
+            }}>Napisz na Telegramie</p>
           </div>
         </div>
 
@@ -3490,7 +3490,7 @@ function App() {
     );
   }
   const deleteSlot = (id) => {
-    if (!window.confirm("Видалити слот?")) return;
+    if (!window.confirm("Usuń слот?")) return;
 
     // Optimistically remove from UI for instant feedback
     setSlotsAdmin(prev => prev.filter(slot => slot.id !== id));
@@ -3505,7 +3505,7 @@ function App() {
     })
       .then(r => r.json())
       .then(() => {
-        alert("Слот видалено!");
+        alert("Slot видалено!");
 
         // ПЕРЕЗАВАНТАЖУЄМО АКТУАЛЬНИЙ СПИСОК
         fetch(`${API}/api/admin/slots`, {
@@ -3522,7 +3522,7 @@ function App() {
             );
           });
       })
-      .catch(() => alert("❌ Помилка видалення"));
+      .catch(() => alert("❌ Błąd видалення"));
   };
 
   if (mode === "rescheduleAppointment") {
@@ -3548,7 +3548,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            📅 Перенести запис
+            📅 Przenieś запис
           </h2>
           <p style={{
             fontSize: '1rem',
@@ -3592,7 +3592,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад до записів
+            ← Wstecz do wizyt
           </button>
         </div>
 
@@ -3613,7 +3613,7 @@ function App() {
             }}>
               <div style={{ fontSize: '3rem', marginBottom: '15px', opacity: 0.6 }}>⏳</div>
               <h3 style={{ margin: '0 0 10px 0', color: '#666', fontSize: '1.2rem', fontWeight: '600' }}>
-                Вільних часів немає
+                Вільних часів brak
               </h3>
               <p style={{ margin: '0', color: '#888', fontSize: '0.95rem' }}>
                 Спробуйте пізніше 😊
@@ -3691,7 +3691,7 @@ function App() {
                 onClick={() => {
                   const selectedSlot = slots.find(s => s.id === rescheduleSelectedSlotId);
                   if (!selectedSlot) {
-                    alert('❌ Помилка: слот не знайдено');
+                    alert('❌ Błąd: слот не знайдено');
                     return;
                   }
 
@@ -3711,7 +3711,7 @@ function App() {
                     .then(r => r.json())
                     .then(data => {
                       if (data.ok) {
-                        alert('✅ Запис успішно перенесено!');
+                        alert('✅ Wizyta успішно перенесено!');
                         setMode("myAppointments");
                         setSelectedAppointmentId(null);
                         setRescheduleSelectedSlotId(null);
@@ -3723,12 +3723,12 @@ function App() {
                           .then(data => setMyHistory(data))
                           .catch(err => console.error('Error reloading:', err));
                       } else {
-                        alert('❌ Помилка: ' + (data.error || 'невідома помилка'));
+                        alert('❌ Błąd: ' + (data.error || 'невідома помилка'));
                       }
                     })
                     .catch(err => {
                       console.error('Reschedule error:', err);
-                      alert('❌ Помилка перенесення');
+                      alert('❌ Błąd перенесення');
                     });
                 }}
                 style={{
@@ -3752,7 +3752,7 @@ function App() {
                   e.target.style.boxShadow = '0 6px 20px rgba(39, 174, 96, 0.3)';
                 }}
               >
-                ✅ Перенести на цей час
+                ✅ Przenieś на цей час
               </button>
             </div>
           )}
@@ -3835,7 +3835,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад до меню
+            ← Wstecz do menu
           </button>
         </div>
 
@@ -3884,7 +3884,7 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: 'white'
-            }}>Усі записи</h3>
+            }}>Wszystkie wizyty</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
@@ -3935,13 +3935,13 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: '#2c3e50'
-            }}>Клієнти</h3>
+            }}>Klientи</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
               opacity: '0.8',
               color: '#2c3e50'
-            }}>База клієнтів</p>
+            }}>Baza klientów</p>
           </div>
 
           {/* Working Slots Card */}
@@ -3993,7 +3993,7 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: 'white'
-            }}>Робочі слоти</h3>
+            }}>Sloty robocze</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
@@ -4044,13 +4044,13 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: 'white'
-            }}>Прайс</h3>
+            }}>Cennik</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
               opacity: '0.9',
               color: 'white'
-            }}>Редагування цін</p>
+            }}>Edycja cen</p>
           </div>
 
           {/* Promotions Card */}
@@ -4095,13 +4095,13 @@ function App() {
               fontSize: '1.3rem',
               fontWeight: '600',
               color: '#2c3e50'
-            }}>Акції</h3>
+            }}>Promocje</h3>
             <p style={{
               margin: '0',
               fontSize: '0.9rem',
               opacity: '0.8',
               color: '#2c3e50'
-            }}>Спеціальні пропозиції</p>
+            }}>Specjalne oferty</p>
           </div>
 
           {/* Analytics Card */}
@@ -4135,7 +4135,7 @@ function App() {
                 })
                 .catch(err => {
                   console.error('Error fetching analytics:', err);
-                  alert('❌ Помилка завантаження аналітики');
+                  alert('❌ Błąd завантаження аналітики');
                 });
             }}
             style={{
@@ -4175,7 +4175,7 @@ function App() {
               fontSize: '0.9rem',
               opacity: '0.9',
               color: 'white'
-            }}>Статистика бізнесу</p>
+            }}>Statystyka biznesu</p>
             <div style={{
               position: 'absolute',
               top: '10px',
@@ -4231,7 +4231,7 @@ function App() {
                 color: '#2c3e50',
                 fontWeight: '600'
               }}>
-                Відправити клієнту повідомлення?
+                Wyślij клієнту повідомлення?
               </h3>
 
               <p style={{
@@ -4241,12 +4241,12 @@ function App() {
                 lineHeight: '1.5'
               }}>
                 {notificationDialog.action === 'status' && notificationDialog.statusValue === 'approved'
-                  ? 'Клієнт отримає повідомлення про підтвердження запису'
+                  ? 'Klient отримає повідомлення про підтвердження запису'
                   : notificationDialog.action === 'status' && notificationDialog.statusValue === 'canceled'
-                    ? 'Клієнт отримає повідомлення про скасування запису'
+                    ? 'Klient отримає повідомлення про скасування запису'
                     : notificationDialog.action === 'delete'
-                      ? 'Клієнт отримає повідомлення про видалення запису'
-                      : 'Клієнт отримає повідомлення про зміну в записі'}
+                      ? 'Klient отримає повідомлення про видалення запису'
+                      : 'Klient отримає повідомлення про зміну в записі'}
               </p>
 
               <div style={{
@@ -4278,7 +4278,7 @@ function App() {
                     e.target.style.color = '#95a5a6';
                   }}
                 >
-                  ✕ Скасувати
+                  ✕ Anuluj
                 </button>
 
                 <button
@@ -4356,7 +4356,7 @@ function App() {
                 color: '#999',
                 fontSize: '0.85rem'
               }}>
-                або натисніть "Скасувати" щоб пропустити
+                або натисніть "Anuluj" щоб пропустити
               </p>
             </div>
           </div>
@@ -4439,7 +4439,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад в адмінку
+            ← Wstecz do adminki
           </button>
         </div>
 
@@ -4564,7 +4564,7 @@ function App() {
                   padding: '15px'
                 }}>
                   <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2c3e50', marginBottom: '8px' }}>
-                    📊 Очікується записів: {analyticsForecast.forecast_appointments}
+                    📊 Oczekiwanieться записів: {analyticsForecast.forecast_appointments}
                   </div>
                   <div style={{ fontSize: '0.9rem', color: '#666' }}>
                     Розраховано на основі {analyticsForecast.based_on_months} місяців
@@ -4868,7 +4868,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            🗓 Робочі слоти 🔥
+            🗓 Sloty robocze 🔥
           </h2>
           <p style={{
             fontSize: '1rem',
@@ -4908,7 +4908,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад в адмінку
+            ← Wstecz do adminki
           </button>
         </div>
 
@@ -4956,7 +4956,7 @@ function App() {
                 })
                 .catch(err => {
                   console.error('Error loading slots:', err);
-                  alert('❌ Помилка завантаження слотів');
+                  alert('❌ Błąd завантаження слотів');
                 });
             }}
             style={{
@@ -5003,7 +5003,7 @@ function App() {
             fontWeight: '600',
             textTransform: 'uppercase'
           }}>
-            ➕ Додати слот
+            ➕ Dodaj слот
           </div>
 
           <div style={{ paddingTop: '20px' }}>
@@ -5021,7 +5021,7 @@ function App() {
                   marginBottom: '8px',
                   fontSize: '0.9rem'
                 }}>
-                  📅 Дата
+                  📅 Data
                 </label>
                 <input
                   id="newSlotDate"
@@ -5047,7 +5047,7 @@ function App() {
                   marginBottom: '8px',
                   fontSize: '0.9rem'
                 }}>
-                  ⏰ Час
+                  ⏰ Czas
                 </label>
                 <input
                   id="newSlotTime"
@@ -5087,7 +5087,7 @@ function App() {
                 })
                   .then(r => r.json())
                   .then(() => {
-                    alert("Слот додано!");
+                    alert("Slot додано!");
 
                     fetch(`${API}/api/admin/slots`, {
                       headers: { "x-init-data": WebApp.initData }
@@ -5124,7 +5124,7 @@ function App() {
                 e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
               }}
             >
-              ➕ Додати слот
+              ➕ Dodaj слот
             </button>
           </div>
         </div>
@@ -5206,7 +5206,7 @@ function App() {
                   fontWeight: '600',
                   textTransform: 'uppercase'
                 }}>
-                  {s.is_booked ? "🔴 Зайнято" : "🟢 Вільно"}
+                  {s.is_booked ? "🔴 Zajęte" : "🟢 Вільно"}
                 </div>
 
                 <div style={{ paddingTop: '40px' }}>
@@ -5233,7 +5233,7 @@ function App() {
                         color: '#2c3e50',
                         marginBottom: '8px'
                       }}>
-                        👤 Клієнт:
+                        👤 Klient:
                       </div>
                       <div
                         onClick={() =>
@@ -5274,7 +5274,7 @@ function App() {
                         fontWeight: '600',
                         color: '#27ae60'
                       }}>
-                        ✅ Слот вільний
+                        ✅ Slot вільний
                       </div>
                     </div>
                   )}
@@ -5305,7 +5305,7 @@ function App() {
                         e.target.style.boxShadow = '0 4px 15px rgba(255, 107, 107, 0.3)';
                       }}
                     >
-                      ✖ Видалити слот
+                      ✖ Usuń слот
                     </button>
                   )}
                 </div>
@@ -5418,7 +5418,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад в адмінку
+            ← Wstecz do adminki
           </button>
         </div>
 
@@ -5502,7 +5502,7 @@ function App() {
           borderLeft: '5px solid #667eea'
         }}>
           <h3 style={{ margin: '0 0 15px 0', color: '#2c3e50', fontSize: '1.2rem' }}>
-            📍 Слоти на {selectedDateStr}
+            📍 Slotи на {selectedDateStr}
           </h3>
 
           {slotsOnSelectedDate.length > 0 ? (
@@ -5523,7 +5523,7 @@ function App() {
                     <br />
                     {slot.is_booked ? (
                       <small style={{ color: '#e74c3c', fontWeight: '600' }}>
-                        🔴 Зайнято {slot.client_name ? `(${slot.client_name})` : ''}
+                        🔴 Zajęte {slot.client_name ? `(${slot.client_name})` : ''}
                       </small>
                     ) : (
                       <small style={{ color: '#2ecc71', fontWeight: '600' }}>
@@ -5554,7 +5554,7 @@ function App() {
                         e.target.style.boxShadow = 'none';
                       }}
                     >
-                      🗑 Видалити
+                      🗑 Usuń
                     </button>
                   )}
                 </div>
@@ -5591,7 +5591,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад в адмінку
+            ← Wstecz do adminki
           </button>
         </div>
 
@@ -5647,7 +5647,7 @@ function App() {
           setAdminPricesDraft(data.priceListServices);
           setPriceListServices(data.priceListServices);
         }
-        alert('✅ Прайс оновлено');
+        alert('✅ Cennik оновлено');
       } catch (e) {
         alert('❌ Не вдалося зберегти');
       } finally {
@@ -5672,9 +5672,9 @@ function App() {
 
         <div className="card" style={{ padding: '16px', borderRadius: '16px' }}>
           {isLoadingAdminPrices ? (
-            <div style={{ color: '#666' }}>Завантаження...</div>
+            <div style={{ color: '#666' }}>Pobierzення...</div>
           ) : adminPricesDraft.length === 0 ? (
-            <div style={{ color: '#999' }}>Прайс порожній</div>
+            <div style={{ color: '#999' }}>Cennik порожній</div>
           ) : (
             adminPricesDraft.map(service => (
               <div key={service.id || service.title} style={{
@@ -5722,7 +5722,7 @@ function App() {
                         <input
                           value={opt.length || ''}
                           onChange={(e) => updateNestedList(service.id, 'lengthOptions', idx, 'length', e.target.value)}
-                          placeholder="Довжина (опц.)"
+                          placeholder="Długość (опц.)"
                           style={{ padding: 10, borderRadius: 8, border: '1px solid #ddd', width: '100%', fontSize: '14px' }}
                         />
                         <input
@@ -5750,13 +5750,13 @@ function App() {
                         padding: '8px 12px',
                         cursor: 'pointer'
                       }}
-                    >+ Додати довжину</button>
+                    >+ Dodaj довжину</button>
                   </div>
                 )}
 
                 {service.designOptions && (
                   <div style={{ marginTop: 14 }}>
-                    <div style={{ fontWeight: 600, marginBottom: 8 }}>Дизайни</div>
+                    <div style={{ fontWeight: 600, marginBottom: 8 }}>Projektи</div>
                     {service.designOptions.length === 0 && (
                       <div style={{ color: '#999', marginBottom: 8 }}>Немає варіантів</div>
                     )}
@@ -5799,7 +5799,7 @@ function App() {
                         padding: '8px 12px',
                         cursor: 'pointer'
                       }}
-                    >+ Додати дизайн</button>
+                    >+ Dodaj дизайн</button>
                   </div>
                 )}
               </div>
@@ -5823,7 +5823,7 @@ function App() {
               opacity: isSavingAdminPrices ? 0.7 : 1,
               boxShadow: '0 4px 15px rgba(67, 233, 123, 0.3)'
             }}
-          >{isSavingAdminPrices ? 'Збереження...' : 'Зберегти всі зміни'}</button>
+          >{isSavingAdminPrices ? 'Збереження...' : 'Zapisz всі зміни'}</button>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
@@ -5840,7 +5840,7 @@ function App() {
               color: 'white',
               cursor: 'pointer'
             }}
-          >← Назад в адмінку</button>
+          >← Wstecz do adminki</button>
         </div>
 
         {modal}
@@ -5880,7 +5880,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            🎉 Акції та знижки 🔥
+            🎉 Promocje та знижки 🔥
           </h2>
           <p style={{
             fontSize: '1rem',
@@ -5920,7 +5920,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад в адмінку
+            ← Wstecz do adminki
           </button>
         </div>
 
@@ -6182,8 +6182,8 @@ function App() {
                   .then(r => r.json())
                   .then(setPromotions)
                   .catch(err => {
-                    console.error('❌ Помилка додавання акції:', err);
-                    alert(`❌ Помилка: ${err.message}`);
+                    console.error('❌ Błąd додавання акції:', err);
+                    alert(`❌ Błąd: ${err.message}`);
                   });
               }}
               style={{
@@ -6208,7 +6208,7 @@ function App() {
                 e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
               }}
             >
-              ➕ Додати акцію
+              ➕ Dodaj акцію
             </button>
           </div>
         </div>
@@ -6311,8 +6311,8 @@ function App() {
                         .then(r => r.json())
                         .then(setPromotions)
                         .catch(err => {
-                          console.error('❌ Помилка оновлення акції:', err);
-                          alert(`❌ Помилка: ${err.message}`);
+                          console.error('❌ Błąd оновлення акції:', err);
+                          alert(`❌ Błąd: ${err.message}`);
                         });
                     }
                   }}
@@ -6341,7 +6341,7 @@ function App() {
                 <button
                   className="btn-small btn-cancel"
                   onClick={() => {
-                    if (window.confirm(`Видалити акцію "${promo.name}"?`)) {
+                    if (window.confirm(`Usuń акцію "${promo.name}"?`)) {
                       fetch(`${API}/api/admin/promotion/${promo.id}`, {
                         method: "DELETE",
                         headers: { "x-init-data": WebApp.initData }
@@ -6360,8 +6360,8 @@ function App() {
                         .then(r => r.json())
                         .then(setPromotions)
                         .catch(err => {
-                          console.error('❌ Помилка видалення акції:', err);
-                          alert(`❌ Помилка: ${err.message}`);
+                          console.error('❌ Błąd видалення акції:', err);
+                          alert(`❌ Błąd: ${err.message}`);
                         });
                     }
                   }}
@@ -6521,7 +6521,7 @@ function App() {
             zIndex: 1,
             position: 'relative'
           }}>
-            ➕ Додати слот 🔥
+            ➕ Dodaj слот 🔥
           </h2>
           <p style={{
             fontSize: '1rem',
@@ -6561,7 +6561,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад в адмінку
+            ← Wstecz do adminki
           </button>
         </div>
 
@@ -6676,7 +6676,7 @@ function App() {
                 })
                   .then(r => r.json())
                   .then(() => {
-                    alert("✅ Слот додано успішно!");
+                    alert("✅ Slot додано успішно!");
                     setMode("adminMenu");
                   });
               }}
@@ -6702,7 +6702,7 @@ function App() {
                 e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
               }}
             >
-              ➕ Додати слот
+              ➕ Dodaj слот
             </button>
           </div>
         </div>
@@ -6732,7 +6732,7 @@ function App() {
             fontWeight: '600',
             textTransform: 'uppercase'
           }}>
-            ℹ️ Інформація
+            ℹ️ Informacja
           </div>
 
           <div style={{ paddingTop: '20px' }}>
@@ -6793,8 +6793,8 @@ function App() {
                     margin: '0',
                     paddingLeft: '20px'
                   }}>
-                    <li>Дата не може бути в минулому</li>
-                    <li>Час має бути в робочий період</li>
+                    <li>Data не може бути в минулому</li>
+                    <li>Czas має бути в робочий період</li>
                     <li>Уникайте дублювання слотів</li>
                   </ul>
                 </div>
@@ -6880,7 +6880,7 @@ function App() {
             }}>
               <div style={{ textAlign: 'center', marginBottom: 30 }}>
                 <div style={{ fontSize: 48, marginBottom: 10 }}>💅</div>
-                <h1 style={{ color: '#333', marginBottom: 10, fontSize: 28 }}>Запис на манікюр</h1>
+                <h1 style={{ color: '#333', marginBottom: 10, fontSize: 28 }}>Wizyta на манікюр</h1>
                 <p style={{ color: '#666', fontSize: 16 }}>
                   Привіт{tgUser?.first_name ? `, ${tgUser.first_name}` : ''}! Давайте створимо ваш ідеальний манікюр
                 </p>
@@ -6900,8 +6900,8 @@ function App() {
                           setServiceCategory(service.title || service.name);
                           setServiceSub(service.title || service.name);
                           setSizeCategory("");
-                          setDesignCategory("Однотонний");
-                          setMattingCategory("Глянцеве");
+                          setDesignCategory("Jednolity");
+                          setMattingCategory("Błyszczący");
                           // Set price based on service type
                           if (service.fixedPrice) {
                             setPrice(service.fixedPrice);
@@ -6936,21 +6936,21 @@ function App() {
                   ) : (
                     /* Fallback to hardcoded if no data loaded */
                     <>
-                      {/* Укріплення */}
+                      {/* Wzmocnienie */}
                       <div
                         onClick={() => {
-                          setServiceCategory("Укріплення");
-                          setServiceSub("Укріплення");
+                          setServiceCategory("Wzmocnienie");
+                          setServiceSub("Wzmocnienie");
                           setSizeCategory("");
-                          setDesignCategory("Однотонний");
-                          setMattingCategory("Глянцеве");
+                          setDesignCategory("Jednolity");
+                          setMattingCategory("Błyszczący");
                           setPrice(0);
                         }}
                         style={{
                           padding: 20,
                           borderRadius: 14,
-                          border: serviceCategory === "Укріплення" ? '2px solid #667eea' : '2px solid #e0e0e0',
-                          background: serviceCategory === "Укріплення" ? 'rgba(102, 126, 234, 0.1)' : 'white',
+                          border: serviceCategory === "Wzmocnienie" ? '2px solid #667eea' : '2px solid #e0e0e0',
+                          background: serviceCategory === "Wzmocnienie" ? 'rgba(102, 126, 234, 0.1)' : 'white',
                           cursor: 'pointer',
                           transition: 'all 0.3s ease',
                           textAlign: 'center'
@@ -6958,28 +6958,28 @@ function App() {
                       >
                         <div style={{ fontSize: 32, marginBottom: 10 }}>💪</div>
                         <div style={{ fontWeight: 'bold', marginBottom: 5, color: '#333', fontSize: 16 }}>
-                          Укріплення 💅
+                          Wzmocnienie 💅
                         </div>
                         <div style={{ color: '#666', fontSize: 13 }}>
                           від 100 zł
                         </div>
                       </div>
 
-                      {/* Нарощення */}
+                      {/* Przedłużenie */}
                       <div
                         onClick={() => {
-                          setServiceCategory("Нарощення");
-                          setServiceSub("Нарощення");
+                          setServiceCategory("Przedłużenie");
+                          setServiceSub("Przedłużenie");
                           setSizeCategory("");
-                          setDesignCategory("Однотонний");
-                          setMattingCategory("Глянцеве");
+                          setDesignCategory("Jednolity");
+                          setMattingCategory("Błyszczący");
                           setPrice(0);
                         }}
                         style={{
                           padding: 20,
                           borderRadius: 14,
-                          border: serviceCategory === "Нарощення" ? '2px solid #667eea' : '2px solid #e0e0e0',
-                          background: serviceCategory === "Нарощення" ? 'rgba(102, 126, 234, 0.1)' : 'white',
+                          border: serviceCategory === "Przedłużenie" ? '2px solid #667eea' : '2px solid #e0e0e0',
+                          background: serviceCategory === "Przedłużenie" ? 'rgba(102, 126, 234, 0.1)' : 'white',
                           cursor: 'pointer',
                           transition: 'all 0.3s ease',
                           textAlign: 'center'
@@ -6987,18 +6987,18 @@ function App() {
                       >
                         <div style={{ fontSize: 32, marginBottom: 10 }}>✨</div>
                         <div style={{ fontWeight: 'bold', marginBottom: 5, color: '#333', fontSize: 16 }}>
-                          Нарощення
+                          Przedłużenie
                         </div>
                         <div style={{ color: '#666', fontSize: 13 }}>
                           від 130 zł
                         </div>
                       </div>
 
-                      {/* Гігієнічний */}
+                      {/* Higieniczny */}
                       <div
                         onClick={() => {
-                          setServiceCategory("Гігієнічний");
-                          setServiceSub("Гігієнічний");
+                          setServiceCategory("Higieniczny");
+                          setServiceSub("Higieniczny");
                           setSizeCategory("");
                           setDesignCategory("");
                           setMattingCategory("");
@@ -7007,8 +7007,8 @@ function App() {
                         style={{
                           padding: 20,
                           borderRadius: 14,
-                          border: serviceCategory === "Гігієнічний" ? '2px solid #667eea' : '2px solid #e0e0e0',
-                          background: serviceCategory === "Гігієнічний" ? 'rgba(102, 126, 234, 0.1)' : 'white',
+                          border: serviceCategory === "Higieniczny" ? '2px solid #667eea' : '2px solid #e0e0e0',
+                          background: serviceCategory === "Higieniczny" ? 'rgba(102, 126, 234, 0.1)' : 'white',
                           cursor: 'pointer',
                           transition: 'all 0.3s ease',
                           textAlign: 'center'
@@ -7016,7 +7016,7 @@ function App() {
                       >
                         <div style={{ fontSize: 32, marginBottom: 10 }}>💅</div>
                         <div style={{ fontWeight: 'bold', marginBottom: 5, color: '#333', fontSize: 16 }}>
-                          Гігієнічний
+                          Higieniczny
                         </div>
                         <div style={{ color: '#667eea', fontWeight: 'bold', fontSize: 14 }}>
                           70 zł
@@ -7041,7 +7041,7 @@ function App() {
                     fontWeight: 'bold'
                   }}
                 >
-                  ← Назад до меню
+                  ← Wstecz do menu
                 </button>
 
                 <button
@@ -7162,7 +7162,7 @@ function App() {
             }}>
               <div style={{ textAlign: 'center', marginBottom: 30 }}>
                 <div style={{ fontSize: 48, marginBottom: 10 }}>📏</div>
-                <h2 style={{ color: '#333', marginBottom: 10 }}>Довжина нігтів</h2>
+                <h2 style={{ color: '#333', marginBottom: 10 }}>Długość нігтів</h2>
                 <p style={{ color: '#666' }}>Оберіть розмір нігтів</p>
                 <div style={{ marginTop: 16 }}>
                   <img
@@ -7184,21 +7184,21 @@ function App() {
               <div style={{ display: 'grid', gap: 25 }}>
 
                 {/* ===== УКРІПЛЕННЯ MENU ===== */}
-                {serviceCategory.includes("Укріплення") && !serviceCategory.includes("Нарощення") && (
+                {serviceCategory.includes("Wzmocnienie") && !serviceCategory.includes("Przedłużenie") && (
                   <>
                     {/* Size Selection - УКРІПЛЕННЯ ONLY */}
                     <div>
                       <label style={{ display: 'block', marginBottom: 10, fontWeight: 'bold', color: '#555' }}>
-                        Довжина нігтів:
+                        Długość нігтів:
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
-                        {priceListServices.length > 0 && priceListServices.find(s => (s.title || s.name) === "Укріплення")?.lengthOptions ? (
-                          priceListServices.find(s => (s.title || s.name) === "Укріплення").lengthOptions.map(item => (
+                        {priceListServices.length > 0 && priceListServices.find(s => (s.title || s.name) === "Wzmocnienie")?.lengthOptions ? (
+                          priceListServices.find(s => (s.title || s.name) === "Wzmocnienie").lengthOptions.map(item => (
                             <button
                               key={item.size}
                               onClick={() => {
                                 setSizeCategory(item.size);
-                                setPrice(calculatePrice("Укріплення", item.size, designCategory, mattingCategory));
+                                setPrice(calculatePrice("Wzmocnienie", item.size, designCategory, mattingCategory));
                               }}
                               style={{
                                 padding: 15,
@@ -7217,7 +7217,7 @@ function App() {
                         ) : (
                           /* Fallback to hardcoded */
                           [
-                            { size: 'Нульова', price: 100 },
+                            { size: 'Zero', price: 100 },
                             { size: 'S', price: 110 },
                             { size: 'M', price: 120 },
                             { size: 'L', price: 130 },
@@ -7229,7 +7229,7 @@ function App() {
                               key={item.size}
                               onClick={() => {
                                 setSizeCategory(item.size);
-                                setPrice(calculatePrice("Укріплення", item.size, designCategory, mattingCategory));
+                                setPrice(calculatePrice("Wzmocnienie", item.size, designCategory, mattingCategory));
                               }}
                               style={{
                                 padding: 15,
@@ -7252,21 +7252,21 @@ function App() {
                 )}
 
                 {/* ===== НАРОЩЕННЯ MENU ===== */}
-                {serviceCategory.includes("Нарощення") && !serviceCategory.includes("Укріплення") && (
+                {serviceCategory.includes("Przedłużenie") && !serviceCategory.includes("Wzmocnienie") && (
                   <>
                     {/* Size Selection - НАРОЩЕННЯ ONLY */}
                     <div>
                       <label style={{ display: 'block', marginBottom: 10, fontWeight: 'bold', color: '#555' }}>
-                        Довжина нігтів:
+                        Długość нігтів:
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
-                        {priceListServices.length > 0 && priceListServices.find(s => (s.title || s.name) === "Нарощення")?.lengthOptions ? (
-                          priceListServices.find(s => (s.title || s.name) === "Нарощення").lengthOptions.map(item => (
+                        {priceListServices.length > 0 && priceListServices.find(s => (s.title || s.name) === "Przedłużenie")?.lengthOptions ? (
+                          priceListServices.find(s => (s.title || s.name) === "Przedłużenie").lengthOptions.map(item => (
                             <button
                               key={item.size}
                               onClick={() => {
                                 setSizeCategory(item.size);
-                                setPrice(calculatePrice("Нарощення", item.size, designCategory, mattingCategory));
+                                setPrice(calculatePrice("Przedłużenie", item.size, designCategory, mattingCategory));
                               }}
                               style={{
                                 padding: 15,
@@ -7297,7 +7297,7 @@ function App() {
                               key={item.size}
                               onClick={() => {
                                 setSizeCategory(item.size);
-                                setPrice(calculatePrice("Нарощення", item.size, designCategory, mattingCategory));
+                                setPrice(calculatePrice("Przedłużenie", item.size, designCategory, mattingCategory));
                               }}
                               style={{
                                 padding: 15,
@@ -7340,7 +7340,7 @@ function App() {
 
                 <button
                   onClick={() => {
-                    const needsSize = serviceCategory.includes('Укріплення') || serviceCategory.includes('Нарощення');
+                    const needsSize = serviceCategory.includes('Wzmocnienie') || serviceCategory.includes('Przedłużenie');
                     if (needsSize && !sizeCategory) {
                       alert('❗ Оберіть довжину перед продовженням');
                       return;
@@ -7376,29 +7376,29 @@ function App() {
             }}>
               <div style={{ textAlign: 'center', marginBottom: 30 }}>
                 <div style={{ fontSize: 48, marginBottom: 10 }}>🎨</div>
-                <h2 style={{ color: '#333', marginBottom: 10 }}>Дизайн</h2>
+                <h2 style={{ color: '#333', marginBottom: 10 }}>Projekt</h2>
                 <p style={{ color: '#666' }}>Оберіть тип дизайну</p>
               </div>
 
               <div style={{ display: 'grid', gap: 25 }}>
                 {/* ===== УКРІПЛЕННЯ MENU ===== */}
-                {serviceCategory.includes("Укріплення") && !serviceCategory.includes("Нарощення") && (
+                {serviceCategory.includes("Wzmocnienie") && !serviceCategory.includes("Przedłużenie") && (
                   <>
                     {/* Design Selection - УКРІПЛЕННЯ */}
                     <div>
                       <label style={{ display: 'block', marginBottom: 10, fontWeight: 'bold', color: '#555' }}>
-                        Дизайн:
+                        Projekt:
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
-                        {priceListServices.length > 0 && priceListServices.find(s => (s.title || s.name) === "Укріплення")?.designOptions ? (
-                          priceListServices.find(s => (s.title || s.name) === "Укріплення").designOptions.map(item => {
+                        {priceListServices.length > 0 && priceListServices.find(s => (s.title || s.name) === "Wzmocnienie")?.designOptions ? (
+                          priceListServices.find(s => (s.title || s.name) === "Wzmocnienie").designOptions.map(item => {
                             const isSelected = designCategory === item.value;
                             return (
                               <button
                                 key={item.value}
                                 onClick={() => {
                                   setDesignCategory(item.value);
-                                  setPrice(calculatePrice("Укріплення", sizeCategory, item.value, mattingCategory));
+                                  setPrice(calculatePrice("Wzmocnienie", sizeCategory, item.value, mattingCategory));
                                 }}
                                 style={{
                                   padding: 12,
@@ -7419,10 +7419,10 @@ function App() {
                         ) : (
                           /* Fallback to hardcoded */
                           [
-                            { value: 'Однотонний', price: 0, desc: 'Без декору' },
-                            { value: 'Простий', price: 15, desc: 'Крапки, лінії, блискітки' },
-                            { value: 'Середній', price: 25, desc: 'Френч, геометрія, наклейки' },
-                            { value: 'Складний', price: 35, desc: 'Детальні малюнки, об\'ємні' }
+                            { value: 'Jednolity', price: 0, desc: 'Без декору' },
+                            { value: 'Prosty', price: 15, desc: 'Крапки, лінії, блискітки' },
+                            { value: 'Średni', price: 25, desc: 'Френч, геометрія, наклейки' },
+                            { value: 'Trudny', price: 35, desc: 'Детальні малюнки, об\'ємні' }
                           ].map(item => {
                             const isSelected = designCategory === item.value;
                             return (
@@ -7430,7 +7430,7 @@ function App() {
                                 key={item.value}
                                 onClick={() => {
                                   setDesignCategory(item.value);
-                                  setPrice(calculatePrice("Укріплення", sizeCategory, item.value, mattingCategory));
+                                  setPrice(calculatePrice("Wzmocnienie", sizeCategory, item.value, mattingCategory));
                                 }}
                                 style={{
                                   padding: 12,
@@ -7455,23 +7455,23 @@ function App() {
                 )}
 
                 {/* ===== НАРОЩЕННЯ MENU ===== */}
-                {serviceCategory.includes("Нарощення") && !serviceCategory.includes("Укріплення") && (
+                {serviceCategory.includes("Przedłużenie") && !serviceCategory.includes("Wzmocnienie") && (
                   <>
                     {/* Design Selection - НАРОЩЕННЯ */}
                     <div>
                       <label style={{ display: 'block', marginBottom: 10, fontWeight: 'bold', color: '#555' }}>
-                        Дизайн:
+                        Projekt:
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
-                        {priceListServices.length > 0 && priceListServices.find(s => (s.title || s.name) === "Нарощення")?.designOptions ? (
-                          priceListServices.find(s => (s.title || s.name) === "Нарощення").designOptions.map(item => {
+                        {priceListServices.length > 0 && priceListServices.find(s => (s.title || s.name) === "Przedłużenie")?.designOptions ? (
+                          priceListServices.find(s => (s.title || s.name) === "Przedłużenie").designOptions.map(item => {
                             const isSelected = designCategory === item.value;
                             return (
                               <button
                                 key={item.value}
                                 onClick={() => {
                                   setDesignCategory(item.value);
-                                  setPrice(calculatePrice("Нарощення", sizeCategory, item.value, mattingCategory));
+                                  setPrice(calculatePrice("Przedłużenie", sizeCategory, item.value, mattingCategory));
                                 }}
                                 style={{
                                   padding: 12,
@@ -7492,10 +7492,10 @@ function App() {
                         ) : (
                           /* Fallback to hardcoded */
                           [
-                            { value: 'Однотонний', price: 0, desc: 'Без декору' },
-                            { value: 'Простий', price: 15, desc: 'Крапки, лінії, блискітки' },
-                            { value: 'Середній', price: 25, desc: 'Френч, геометрія, наклейки' },
-                            { value: 'Складний', price: 35, desc: 'Детальні малюнки, об\'ємні' }
+                            { value: 'Jednolity', price: 0, desc: 'Без декору' },
+                            { value: 'Prosty', price: 15, desc: 'Крапки, лінії, блискітки' },
+                            { value: 'Średni', price: 25, desc: 'Френч, геометрія, наклейки' },
+                            { value: 'Trudny', price: 35, desc: 'Детальні малюнки, об\'ємні' }
                           ].map(item => {
                             const isSelected = designCategory === item.value;
                             return (
@@ -7503,7 +7503,7 @@ function App() {
                                 key={item.value}
                                 onClick={() => {
                                   setDesignCategory(item.value);
-                                  setPrice(calculatePrice("Нарощення", sizeCategory, item.value, mattingCategory));
+                                  setPrice(calculatePrice("Przedłużenie", sizeCategory, item.value, mattingCategory));
                                 }}
                                 style={{
                                   padding: 12,
@@ -7547,7 +7547,7 @@ function App() {
 
                 <button
                   onClick={() => {
-                    const needsDesign = serviceCategory.includes('Укріплення') || serviceCategory.includes('Нарощення');
+                    const needsDesign = serviceCategory.includes('Wzmocnienie') || serviceCategory.includes('Przedłużenie');
                     if (needsDesign && !designCategory) {
                       alert('❗ Оберіть дизайн перед продовженням');
                       return;
@@ -7785,7 +7785,7 @@ function App() {
                     paddingBottom: 15,
                     borderBottom: '2px solid rgba(255,255,255,0.2)'
                   }}>
-                    📋 Деталі запису
+                    📋 Szczegóły wizyty
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
@@ -7794,7 +7794,7 @@ function App() {
                       borderRadius: 12,
                       padding: 15
                     }}>
-                      <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 5 }}>Послуга</div>
+                      <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 5 }}>Usługa</div>
                       <div style={{ fontSize: 18, fontWeight: 'bold' }}>{serviceCategory}</div>
                     </div>
 
@@ -7803,7 +7803,7 @@ function App() {
                       borderRadius: 12,
                       padding: 15
                     }}>
-                      <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 5 }}>Дата та час</div>
+                      <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 5 }}>Data та час</div>
                       <div style={{ fontSize: 18, fontWeight: 'bold' }}>{selectedSlot?.date} о {selectedSlot?.time}</div>
                     </div>
 
@@ -7818,24 +7818,24 @@ function App() {
                       </div>
                     )}
 
-                    {designCategory && designCategory !== "Однотонний" && (
+                    {designCategory && designCategory !== "Jednolity" && (
                       <div style={{
                         background: 'rgba(255,255,255,0.15)',
                         borderRadius: 12,
                         padding: 15
                       }}>
-                        <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 5 }}>Дизайн</div>
+                        <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 5 }}>Projekt</div>
                         <div style={{ fontSize: 18, fontWeight: 'bold' }}>{designCategory}</div>
                       </div>
                     )}
 
-                    {mattingCategory && mattingCategory !== "Глянцеве" && (
+                    {mattingCategory && mattingCategory !== "Błyszczący" && (
                       <div style={{
                         background: 'rgba(255,255,255,0.15)',
                         borderRadius: 12,
                         padding: 15
                       }}>
-                        <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 5 }}>Покриття</div>
+                        <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 5 }}>Powłoka</div>
                         <div style={{ fontSize: 18, fontWeight: 'bold' }}>{mattingCategory}</div>
                       </div>
                     )}
@@ -7855,10 +7855,10 @@ function App() {
                       }
                       // Fallback to hardcoded if not found
                       if (designPrice === 0) {
-                        designPrice = { 'Однотонний': 0, 'Простий': 15, 'Середній': 25, 'Складний': 35 }[designCategory] || 0;
+                        designPrice = { 'Jednolity': 0, 'Prosty': 15, 'Średni': 25, 'Trudny': 35 }[designCategory] || 0;
                       }
 
-                      const mattingPrice = mattingCategory === 'Матове' ? 30 : 0;
+                      const mattingPrice = mattingCategory === 'Matowy' ? 30 : 0;
                       let basePrice = 0;
 
                       // Try to get price from priceListServices first
@@ -7868,14 +7868,14 @@ function App() {
                         );
 
                         if (categoryService) {
-                          // For services with lengthOptions (Укріплення, Нарощення)
+                          // For services with lengthOptions (Wzmocnienie, Przedłużenie)
                           if (categoryService.lengthOptions && sizeCategory) {
                             const sizeOption = categoryService.lengthOptions.find(opt => opt.size === sizeCategory);
                             if (sizeOption) {
                               basePrice = sizeOption.price || 0;
                             }
                           }
-                          // For fixed price services (Гігієнічний)
+                          // For fixed price services (Higieniczny)
                           else if (categoryService.fixedPrice) {
                             basePrice = categoryService.fixedPrice;
                           }
@@ -7893,13 +7893,13 @@ function App() {
 
                       // Fallback to hardcoded prices only if no dynamic data available
                       if (basePrice === 0) {
-                        if (serviceCategory === 'Укріплення' && sizeCategory) {
-                          basePrice = { 'Нульова': 100, S: 110, M: 120, L: 130, XL: 140, '2XL': 150, '3XL': 160 }[sizeCategory] || 0;
-                        } else if (serviceCategory === 'Нарощення' && sizeCategory) {
-                          basePrice = { 'Нульова': 130, S: 130, M: 150, L: 170, XL: 190, '2XL': 210, '3XL': 230 }[sizeCategory] || 0;
-                        } else if (serviceCategory === 'Гігієнічний') {
+                        if (serviceCategory === 'Wzmocnienie' && sizeCategory) {
+                          basePrice = { 'Zero': 100, S: 110, M: 120, L: 130, XL: 140, '2XL': 150, '3XL': 160 }[sizeCategory] || 0;
+                        } else if (serviceCategory === 'Przedłużenie' && sizeCategory) {
+                          basePrice = { 'Zero': 130, S: 130, M: 150, L: 170, XL: 190, '2XL': 210, '3XL': 230 }[sizeCategory] || 0;
+                        } else if (serviceCategory === 'Higieniczny') {
                           basePrice = 70;
-                        } else if (serviceCategory === 'Ремонт') {
+                        } else if (serviceCategory === 'Naprawa') {
                           basePrice = 0;
                         } else {
                           basePrice = Math.max(price - designPrice - mattingPrice, 0);
@@ -7961,7 +7961,7 @@ function App() {
                             <span style={{ fontWeight: 'bold' }}>{basePrice} zł</span>
                           </div>
 
-                          {designCategory && designCategory !== "Однотонний" && (
+                          {designCategory && designCategory !== "Jednolity" && (
                             <div style={{
                               fontSize: 13,
                               opacity: 0.9,
@@ -7969,12 +7969,12 @@ function App() {
                               display: 'flex',
                               justifyContent: 'space-between'
                             }}>
-                              <span>+ Дизайн: {designCategory}</span>
+                              <span>+ Projekt: {designCategory}</span>
                               <span style={{ fontWeight: 'bold', color: '#FFD700' }}>+{designPrice} zł</span>
                             </div>
                           )}
 
-                          {mattingCategory && mattingCategory !== "Глянцеве" && (
+                          {mattingCategory && mattingCategory !== "Błyszczący" && (
                             <div style={{
                               fontSize: 13,
                               opacity: 0.9,
@@ -8304,7 +8304,7 @@ function App() {
                     fontWeight: 'bold'
                   }}
                 >
-                  Закрити
+                  Zamknij
                 </button>
               </div>
             </div>
@@ -8367,7 +8367,7 @@ function App() {
           onClick={(e) => e.stopPropagation()}
         >
           <h2 style={{ margin: 0, marginBottom: '18px', color: '#2c3e50' }}>
-            📣 Повідомлення всім клієнтам
+            📣 Wiadomość всім клієнтам
           </h2>
           <textarea
             value={broadcastMessage}
@@ -8397,7 +8397,7 @@ function App() {
                 cursor: 'pointer'
               }}
             >
-              Відправити
+              Wyślij
             </button>
             <button
               onClick={() => {
@@ -8414,7 +8414,7 @@ function App() {
                 cursor: 'pointer'
               }}
             >
-              Скасувати
+              Anuluj
             </button>
           </div>
           {broadcastStatus && (
@@ -8497,7 +8497,7 @@ function App() {
               e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
             }}
           >
-            ← Назад в адмінку
+            ← Wstecz do adminki
           </button>
         </div>
 
@@ -8541,7 +8541,7 @@ function App() {
               }
             }}
           >
-            📋 Усі записи ({currentAppointments.length})
+            📋 Wszystkie wizyty ({currentAppointments.length})
           </button>
 
           <button
@@ -8639,7 +8639,7 @@ function App() {
                   e.target.style.background = 'rgba(255,255,255,0.9)';
                 }}
               >
-                📋 Усі записи
+                📋 Wszystkie wizyty
               </button>
 
               <button
@@ -8859,7 +8859,7 @@ function App() {
                   borderLeft: '5px solid #667eea'
                 }}>
                   <h3 style={{ margin: '0 0 15px 0', color: '#2c3e50', fontSize: '1.2rem' }}>
-                    📍 Записи на {selectedDateStr}
+                    📍 Wizyty на {selectedDateStr}
                   </h3>
 
                   {appointmentsOnSelectedDate.length > 0 ? (
@@ -8913,11 +8913,11 @@ function App() {
                                   onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
                                   onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
                                 >
-                                  👤 {apt.client || apt.client_name || 'Клієнт'} →
+                                  👤 {apt.client || apt.client_name || 'Klient'} →
                                 </a>
                               ) : (
                                 <small style={{ color: '#666' }}>
-                                  {apt.client_name || 'Невідомий клієнт'}
+                                  {apt.client_name || 'Nieznany клієнт'}
                                 </small>
                               )}
                               {apt.reference_image && (
@@ -8946,7 +8946,7 @@ function App() {
                               color: apt.status === 'confirmed' ? '#155724' : apt.status === 'approved' ? '#004085' : '#856404',
                               whiteSpace: 'nowrap'
                             }}>
-                              {apt.status === 'confirmed' ? '✅ Підтверджено' : apt.status === 'approved' ? '✔️ Затверджено' : '⏳ Очікує'}
+                              {apt.status === 'confirmed' ? '✅ Potwierdzone' : apt.status === 'approved' ? '✔️ Zatwierdzone' : '⏳ Oczekiwanie'}
                             </div>
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
@@ -9028,7 +9028,7 @@ function App() {
                                   e.target.style.boxShadow = 'none';
                                 }}
                               >
-                                ❌ Скасувати
+                                ❌ Anuluj
                               </button>
                             )}
                           </div>
@@ -9157,7 +9157,7 @@ function App() {
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px'
                     }}>
-                      {a.status === "approved" ? "✅ Затвер." : a.status === "canceled" ? "❌ Скасов." : "⏳ Очікує"}
+                      {a.status === "approved" ? "✅ Затвер." : a.status === "canceled" ? "❌ Скасов." : "⏳ Oczekiwanie"}
                     </div>
 
                     <div style={{ paddingTop: '50px' }}>
@@ -9229,7 +9229,7 @@ function App() {
                             color: '#2c3e50',
                             marginBottom: '5px'
                           }}>
-                            💬 Коментар:
+                            💬 Komentarz:
                           </div>
                           <div style={{
                             fontSize: '0.9rem',
@@ -9425,7 +9425,7 @@ function App() {
                                 e.target.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.3)';
                               }}
                             >
-                              ❌ Скасувати
+                              ❌ Anuluj
                             </button>
                             <button
                               className="btn-secondary"
@@ -9571,7 +9571,7 @@ function App() {
                                 e.target.style.boxShadow = '0 4px 15px rgba(231, 76, 60, 0.3)';
                               }}
                             >
-                              ✕ Скасувати
+                              ✕ Anuluj
                             </button>
                           </>
                         )}
@@ -9605,7 +9605,7 @@ function App() {
                             e.target.style.boxShadow = '0 4px 15px rgba(52, 152, 219, 0.3)';
                           }}
                         >
-                          💰 Змінити ціну ({a.price} zł)
+                          💰 Zmień cenę ({a.price} zł)
                         </button>
                       </div>
 
@@ -9636,7 +9636,7 @@ function App() {
                             e.target.style.boxShadow = '0 4px 15px rgba(142, 68, 173, 0.3)';
                           }}
                         >
-                          🗑 Видалити запис повністю
+                          🗑 Usuń запис повністю
                         </button>
                       </div>
                     </div>
@@ -9672,7 +9672,7 @@ function App() {
                   marginBottom: '10px',
                   textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                 }}>
-                  Записів поки що немає
+                  Wizytaів поки що brak
                 </div>
                 <div style={{
                   fontSize: '0.9rem',
@@ -9729,7 +9729,7 @@ function App() {
                 color: '#2c3e50',
                 fontWeight: '600'
               }}>
-                Відправити клієнту повідомлення?
+                Wyślij клієнту повідомлення?
               </h3>
 
               <p style={{
@@ -9739,12 +9739,12 @@ function App() {
                 lineHeight: '1.5'
               }}>
                 {notificationDialog.action === 'status' && notificationDialog.statusValue === 'approved'
-                  ? 'Клієнт отримає повідомлення про підтвердження запису'
+                  ? 'Klient отримає повідомлення про підтвердження запису'
                   : notificationDialog.action === 'status' && notificationDialog.statusValue === 'canceled'
-                    ? 'Клієнт отримає повідомлення про скасування запису'
+                    ? 'Klient отримає повідомлення про скасування запису'
                     : notificationDialog.action === 'delete'
-                      ? 'Клієнт отримає повідомлення про видалення запису'
-                      : 'Клієнт отримає повідомлення про зміну в записі'}
+                      ? 'Klient отримає повідомлення про видалення запису'
+                      : 'Klient отримає повідомлення про зміну в записі'}
               </p>
 
               <div style={{
@@ -9776,7 +9776,7 @@ function App() {
                     e.target.style.color = '#95a5a6';
                   }}
                 >
-                  ✕ Скасувати
+                  ✕ Anuluj
                 </button>
 
                 <button
