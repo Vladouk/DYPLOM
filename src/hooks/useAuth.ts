@@ -26,7 +26,7 @@ const useAuth = () => {
         fetchUser();
     }, []);
 
-    const login = async (credentials) => {
+    const login = async (credentials: { email: string; password: string }) => {
         setLoading(true);
         try {
             const response = await fetch('/api/login', {
