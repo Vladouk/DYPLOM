@@ -1,0 +1,25 @@
+{
+  "welcome": "Witamy w aplikacji manicure!",
+  "home": {
+    "title": "Strona główna",
+    "description": "Oferujemy najlepsze usługi manicure w mieście."
+  },
+  "booking": {
+    "title": "Rezerwacja",
+    "description": "Zarezerwuj swoje miejsce na manicure.",
+    "name": "Imię",
+    "email": "Email",
+    "date": "Data",
+    "time": "Czas",
+    "submit": "Zarezerwuj"
+  },
+  "footer": {
+    "copyright": "© 2023 Manicure App. Wszelkie prawa zastrzeżone.",
+    "contact": "Kontakt"
+  },
+  "header": {
+    "home": "Strona główna",
+    "booking": "Rezerwacja",
+    "about": "O nas"
+  }
+}
