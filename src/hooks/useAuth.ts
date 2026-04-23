@@ -16,7 +16,8 @@ const useAuth = () => {
                 const data = await response.json();
                 setUser(data);
             } catch (err) {
-                setError(err.message);
+                const message = err instanceof Error ? err.message : 'An error occurred';
+                setError(message);
             } finally {
                 setLoading(false);
             }
@@ -41,7 +42,8 @@ const useAuth = () => {
             const data = await response.json();
             setUser(data);
         } catch (err) {
-            setError(err.message);
+            const message = err instanceof Error ? err.message : 'An error occurred';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -53,7 +55,8 @@ const useAuth = () => {
             await fetch('/api/logout', { method: 'POST' });
             setUser(null);
         } catch (err) {
-            setError(err.message);
+            const message = err instanceof Error ? err.message : 'An error occurred';
+            setError(message);
         } finally {
             setLoading(false);
         }
